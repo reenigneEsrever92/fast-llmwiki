@@ -2,6 +2,9 @@ pub mod api_client;
 pub mod app;
 
 #[cfg(feature = "ssr")]
+pub mod assets;
+
+#[cfg(feature = "ssr")]
 pub mod ssr;
 
 #[cfg(feature = "hydrate")]

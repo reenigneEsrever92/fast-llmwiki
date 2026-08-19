@@ -2285,10 +2285,12 @@ name = "okf-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "axum",
  "clap",
  "okf-gui",
  "okf-search",
  "okf-server",
+ "okf-storage",
  "tokio",
  "tracing",
  "tracing-subscriber",

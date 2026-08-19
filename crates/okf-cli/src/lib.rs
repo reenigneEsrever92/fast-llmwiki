@@ -10,6 +10,14 @@ use clap::{Args, Parser, Subcommand};
 #[derive(Debug, Parser)]
 #[command(name = "okf", version, about = "Unified OKF launcher")]
 pub struct Cli {
+    /// Directory containing the OKF bundle.
+    #[arg(long, default_value = "./docs")]
+    pub data: std::path::PathBuf,
+
+    /// Address to listen on.
+    #[arg(long, default_value = "127.0.0.1:8080")]
+    pub bind: String,
+
     #[command(subcommand)]
     pub command: Option<Command>,
 }
@@ -79,29 +87,47 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
                 _ = shutdown_signal() => Ok(()),
             }
         }
-        None => run_both().await,
+        None => run_all(cli.data, cli.bind).await,
     }
 }
 
-/// Start the server, GUI, and semantic search service concurrently, wiring the
-/// GUI's API base URL to the server's bind address. All are stopped on
-/// SIGINT/SIGTERM.
-async fn run_both() -> anyhow::Result<()> {
-    let data = std::path::PathBuf::from("./docs");
-    let server_bind = "127.0.0.1:8080".to_string();
-    let gui_bind = "127.0.0.1:8081".to_string();
-    let api_base_url = format!("http://{server_bind}");
-
-    let server = okf_server::serve(data.clone(), server_bind);
-    let gui = okf_gui::ssr::serve(api_base_url, gui_bind);
-    let search = okf_search::serve(data, "127.0.0.1:8082".to_string());
-
+/// Start the REST API, web UI, and semantic search on a single socket.
+///
+/// The three routers are merged into one axum app so the web UI and its API
+/// share an origin (which is what client-side navigation needs), and the whole
+/// bundle is served by a single binary on a single port.
+async fn run_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()> {
     tokio::select! {
-        res = server => res,
-        res = gui => res,
-        res = search => res,
+        res = serve_all(data, bind) => res,
         _ = shutdown_signal() => Ok(()),
     }
+}
+
+async fn serve_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()> {
+    // Open the bundle once and share it with the API and semantic-search crates.
+    let bundle = okf_storage::FsBundle::open(&data).await?;
+    okf_server::api::init_bundle(bundle.clone());
+    okf_search::api::init_bundle(bundle).await?;
+
+    // SSR fetches the API over HTTP on this same socket, so point it at the
+    // loopback address for the chosen port.
+    let port = bind.rsplit(':').next().unwrap_or("8080");
+    okf_gui::api_client::set_api_base_url(format!("http://127.0.0.1:{port}"));
+
+    let app = axum::Router::new()
+        .merge(okf_server::api::router())
+        .merge(okf_search::api::router())
+        .merge(okf_gui::ssr::router());
+
+    let listener = tokio::net::TcpListener::bind(&bind)
+        .await
+        .map_err(|e| anyhow::anyhow!("failed to bind {bind}: {e}"))?;
+    tracing::info!("OKF on http://{bind} (bundle: {})", data.display());
+    axum::serve(listener, app)
+        .await
+        .map_err(|e| anyhow::anyhow!("server error: {e}"))?;
+
+    Ok(())
 }
 
 /// Resolve to completion when the process receives SIGINT or SIGTERM (Ctrl-C on

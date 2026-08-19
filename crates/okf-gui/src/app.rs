@@ -59,13 +59,8 @@ table.src-table th { background:#f9fafb; }
 .tree-node { margin:0; }
 .tree-row { display:flex; align-items:center; gap:0.25rem; border-radius:6px; }
 .tree-row.active { background:#eef2ff; }
-.tree-chevron, .tree-spacer { width:1.25rem; height:1.25rem; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:0.8rem; padding:0; }
-.tree-chevron { border:none; background:transparent; color:var(--muted); cursor:pointer; }
-.tree-chevron::before { content:"▸"; }
-.tree-toggle { display:none; }
-.tree-toggle:checked ~ .tree-row .tree-chevron::before { content:"▾"; }
-.tree-children { display:none; }
-.tree-toggle:checked ~ .tree-children { display:block; }
+.tree-chevron { width:1.25rem; height:1.25rem; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:0.8rem; padding:0; }
+.tree-chevron:empty { cursor:default; }
 .tree-link { flex:1; padding:0.25rem 0.4rem; border-radius:6px; color:var(--fg); text-decoration:none; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tree-link:hover { color:var(--accent); }
 .tree-link.concept { font-weight:500; }
@@ -103,23 +98,27 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
     provide_meta_context();
 
+    let sidebar_open = RwSignal::new(false);
     let reload = RwSignal::new(0u64);
     provide_context(reload);
 
     view! {
         <Router>
-            <input type="checkbox" id="nav-toggle" class="sidebar-toggle-checkbox"/>
             <header class="site-header">
-                <label class="sidebar-toggle" for="nav-toggle" aria-label="Toggle navigation">
+                <button
+                    class="sidebar-toggle"
+                    aria-label="Toggle navigation"
+                    on:click=move |_| sidebar_open.update(|v| *v = !*v)
+                >
                     "☰"
-                </label>
+                </button>
                 <a class="brand" href="/">"OKF Bundle"</a>
                 <form class="search" action="/search" method="get">
                     <input type="search" name="q" placeholder="Search concepts…" autocomplete="off"/>
                 </form>
             </header>
             <div class="layout">
-                <Sidebar/>
+                <Sidebar open=sidebar_open/>
                 <main class="content">
                     <Routes fallback=|| view! { <NotFound/> }>
                         <Route path=StaticSegment("") view=Page ssr=SsrMode::Async/>
@@ -135,7 +134,7 @@ pub fn App() -> impl IntoView {
 }
 
 #[component]
-fn Sidebar() -> impl IntoView {
+fn Sidebar(open: RwSignal<bool>) -> impl IntoView {
     let reload = use_context::<RwSignal<u64>>().expect("reload signal not provided");
 
     let tree = Resource::new(move || reload.get(), move |_| {
@@ -172,8 +171,16 @@ fn Sidebar() -> impl IntoView {
     let location = use_location();
     let pathname = location.pathname;
 
+    let aside_class = move || {
+        if open.get() {
+            "sidebar open"
+        } else {
+            "sidebar"
+        }
+    };
+
     view! {
-        <aside class="sidebar" aria-label="Bundle navigation">
+        <aside class=aside_class aria-label="Bundle navigation">
             <nav class="tree">
                 <Suspense fallback=move || view! { <p class="muted">"Loading…"</p> }>
                     {move || match tree.get() {
@@ -198,73 +205,66 @@ fn TreeItem(node: TreeNodeResponse, pathname: Memo<String>) -> impl IntoView {
     let href = if is_root { "/".to_string() } else { format!("/{path}/") };
     let has_children = !node.children.is_empty() || !node.concepts.is_empty();
 
-    // A unique checkbox id, derived from the directory path.
-    let checkbox_id = if is_root {
-        "tree-root".to_string()
-    } else {
-        format!("tree-{}", path.replace('/', "-"))
-    };
-
-    // Directories that contain (or are) the current page start expanded so the
-    // active entry is visible without requiring any JavaScript.
-    let cur = pathname.get_untracked();
-    let cur = cur.trim_matches('/');
-    let open_initially = is_root
-        || (!cur.is_empty() && (cur == path.as_str() || cur.starts_with(&format!("{path}/"))));
+    let expanded = RwSignal::new(false);
 
     let active_path = path.clone();
-    let row_class = Memo::new(move |_| {
+    let is_active = Memo::new(move |_| {
         let cur = pathname.get();
         let cur = cur.trim_matches('/');
-        let active = if is_root {
+        if is_root {
             cur.is_empty()
         } else {
             cur == active_path.as_str()
-        };
-        if active {
+        }
+    });
+
+    let ancestor_path = path.clone();
+    let ancestor_prefix = format!("{path}/");
+    let is_ancestor = Memo::new(move |_| {
+        if is_root {
+            return true;
+        }
+        let cur = pathname.get();
+        let cur = cur.trim_matches('/');
+        cur == ancestor_path.as_str() || cur.starts_with(ancestor_prefix.as_str())
+    });
+
+    let is_open = Memo::new(move |_| expanded.get() || is_ancestor.get());
+    let row_class = Memo::new(move |_| {
+        if is_active.get() {
             "tree-row active"
         } else {
             "tree-row"
         }
     });
 
-    let children_class = if is_root {
-        "tree-level"
-    } else {
-        "tree-level tree-children"
-    };
-
     view! {
         <li class="tree-node">
-            {if has_children && !is_root {
-                view! {
-                    <input
-                        type="checkbox"
-                        class="tree-toggle"
-                        id=checkbox_id.clone()
-                        checked=open_initially
-                    />
-                }.into_any()
-            } else {
-                ().into_any()
-            }}
             <div class=row_class>
                 {if has_children && !is_root {
                     view! {
-                        <label class="tree-chevron" for=checkbox_id.clone() aria-label="Toggle"></label>
+                        <button
+                            class="tree-chevron"
+                            aria-label="Toggle"
+                            on:click=move |_| expanded.update(|v| *v = !*v)
+                        >
+                            {move || if is_open.get() { "▾" } else { "▸" }}
+                        </button>
                     }.into_any()
                 } else {
-                    view! { <span class="tree-spacer"></span> }.into_any()
+                    view! { <span class="tree-chevron"></span> }.into_any()
                 }}
                 <a class="tree-link" href=href.clone()>{name}</a>
             </div>
-            {if has_children {
+            {move || if is_open.get() {
+                let concepts = node.concepts.clone();
+                let children = node.children.clone();
                 view! {
-                    <ul class=children_class>
-                        <For each=move || node.concepts.clone() key=|c| c.id.clone() let:item>
+                    <ul class="tree-level">
+                        <For each=move || concepts.clone() key=|c| c.id.clone() let:item>
                             <ConceptLeaf summary=item pathname=pathname/>
                         </For>
-                        <For each=move || node.children.clone() key=|c| c.path.clone() let:child>
+                        <For each=move || children.clone() key=|c| c.path.clone() let:child>
                             <TreeItem node=child pathname=pathname/>
                         </For>
                     </ul>
@@ -295,7 +295,7 @@ fn ConceptLeaf(summary: ConceptSummaryResponse, pathname: Memo<String>) -> impl 
     view! {
         <li class="tree-node">
             <div class=row_class>
-                <span class="tree-spacer"></span>
+                <span class="tree-chevron"></span>
                 <a class="tree-link concept" href=href>{title}</a>
             </div>
         </li>
@@ -426,6 +426,50 @@ fn ConceptView(concept: ConceptResponse) -> impl IntoView {
     let has_trust = !generated.is_empty() || !verified.is_empty() || !stale_after.is_empty();
     let content_html = concept.content_html;
 
+    // Build table rows up front and render them without interleaving whitespace
+    // text nodes: the HTML parser foster-parents whitespace out of `<table>`,
+    // which would otherwise cause a hydration mismatch.
+    let mut trust_rows: Vec<AnyView> = Vec::new();
+    if !generated.is_empty() {
+        trust_rows.push(view! { <tr><th>"Generated by"</th><td>{generated}</td></tr> }.into_any());
+    }
+    for v in verified {
+        trust_rows.push(view! { <tr><th>"Verified by"</th><td>{v}</td></tr> }.into_any());
+    }
+    if !stale_after.is_empty() {
+        trust_rows.push(view! { <tr><th>"Stale after"</th><td>{stale_after}</td></tr> }.into_any());
+    }
+
+    let source_rows: Vec<AnyView> = if sources.is_empty() {
+        Vec::new()
+    } else {
+        let mut rows = vec![view! {
+            <tr><th>"ID"</th><th>"Title"</th><th>"Resource"</th><th>"Author"</th><th>"Usage"</th><th>"Modified"</th></tr>
+        }
+        .into_any()];
+        for s in sources {
+            let s_id = s.id.unwrap_or_default();
+            let s_title = s.title.unwrap_or_default();
+            let s_resource = s.resource.unwrap_or_default();
+            let s_author = s.author.unwrap_or_default();
+            let s_usage = s.usage_count.map(|n| n.to_string()).unwrap_or_default();
+            let s_modified = s.last_modified.map(|d| d.to_string()).unwrap_or_default();
+            let s_has_resource = !s_resource.is_empty();
+            rows.push(view! {
+                <tr>
+                    <td>{s_id}</td>
+                    <td>{s_title}</td>
+                    <td>{if s_has_resource { view! { <a href=s_resource.clone()>{s_resource.clone()}</a> }.into_any() } else { ().into_any() }}</td>
+                    <td>{s_author}</td>
+                    <td>{s_usage}</td>
+                    <td>{s_modified}</td>
+                </tr>
+            }
+            .into_any());
+        }
+        rows
+    };
+
     view! {
         <article>
             <nav><a href="/">"Home"</a></nav>
@@ -447,39 +491,14 @@ fn ConceptView(concept: ConceptResponse) -> impl IntoView {
             {if has_trust {
                 view! {
                     <h2 class="section">"Trust"</h2>
-                    <table class="src-table">
-                        {if !generated.is_empty() { view! { <tr><th>"Generated by"</th><td>{generated}</td></tr> }.into_any() } else { ().into_any() }}
-                        {verified.into_iter().map(|v| view! { <tr><th>"Verified by"</th><td>{v}</td></tr> }).collect::<Vec<_>>()}
-                        {if !stale_after.is_empty() { view! { <tr><th>"Stale after"</th><td>{stale_after}</td></tr> }.into_any() } else { ().into_any() }}
-                    </table>
+                    <table class="src-table">{trust_rows}</table>
                 }.into_any()
             } else { ().into_any() }}
 
-            {if !sources.is_empty() {
+            {if !source_rows.is_empty() {
                 view! {
                     <h2 class="section">"Provenance"</h2>
-                    <table class="src-table">
-                        <tr><th>"ID"</th><th>"Title"</th><th>"Resource"</th><th>"Author"</th><th>"Usage"</th><th>"Modified"</th></tr>
-                        {sources.into_iter().map(|s| {
-                            let s_id = s.id.unwrap_or_default();
-                            let s_title = s.title.unwrap_or_default();
-                            let s_resource = s.resource.unwrap_or_default();
-                            let s_author = s.author.unwrap_or_default();
-                            let s_usage = s.usage_count.map(|n| n.to_string()).unwrap_or_default();
-                            let s_modified = s.last_modified.map(|d| d.to_string()).unwrap_or_default();
-                            let s_has_resource = !s_resource.is_empty();
-                            view! {
-                                <tr>
-                                    <td>{s_id}</td>
-                                    <td>{s_title}</td>
-                                    <td>{if s_has_resource { view! { <a href=s_resource.clone()>{s_resource.clone()}</a> }.into_any() } else { ().into_any() }}</td>
-                                    <td>{s_author}</td>
-                                    <td>{s_usage}</td>
-                                    <td>{s_modified}</td>
-                                </tr>
-                            }
-                        }).collect::<Vec<_>>()}
-                    </table>
+                    <table class="src-table">{source_rows}</table>
                 }.into_any()
             } else { ().into_any() }}
 

@@ -11,7 +11,9 @@ path = "src/main.rs"
 okf-server = { path = "../okf-server" }
 okf-gui = { path = "../okf-gui", features = ["ssr"] }
 okf-search = { path = "../okf-search" }
+okf-storage = { path = "../okf-storage" }
 anyhow.workspace = true
+axum.workspace = true
 clap.workspace = true
 tokio.workspace = true
 tracing.workspace = true

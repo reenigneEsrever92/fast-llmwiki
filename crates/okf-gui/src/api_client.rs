@@ -28,7 +28,15 @@ async fn get_json<T: DeserializeOwned>(path: &str) -> Result<T, String> {
         format!("{base}/api/{path}")
     };
     #[cfg(feature = "hydrate")]
-    let url = format!("/api/{path}");
+    let url = {
+        // `reqwest` on WASM cannot resolve a relative URL (there is no base
+        // URL), so build an absolute URL from the current page's origin. This
+        // also keeps the API on the same origin as the served UI.
+        let origin = web_sys::window()
+            .and_then(|w| w.location().origin().ok())
+            .unwrap_or_default();
+        format!("{origin}/api/{path}")
+    };
 
     let resp = reqwest::get(&url).await.map_err(|e| e.to_string())?;
     if !resp.status().is_success() {

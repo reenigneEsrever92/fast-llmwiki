@@ -23,12 +23,19 @@ The project is a Cargo workspace with six crates.
 
 # Data flow
 
-The web UI never touches the bundle. It queries the REST API over HTTP, both
-during server-side rendering and after hydration.
+The `okf` binary (from `okf-cli`) opens the bundle once and serves the REST API,
+web UI, and semantic search as a single merged axum router on one socket. The web
+UI never touches the bundle directly; it queries the REST API over HTTP — both
+during server-side rendering and after hydration — using the same origin, which
+is what makes client-side navigation work without a proxy.
 
-    okf-gui (Leptos) --HTTP--> okf-server (REST API) --reads--> bundle directory
+    okf (single socket)
+      ├── /api/*       -> okf-server REST API
+      ├── /pkg/*       -> embedded okf-gui client bundle
+      ├── /api/search  -> okf-search semantic search
+      └── /            -> okf-gui Leptos SSR + hydration
 
-    okf-search --reads--> bundle directory (via okf-storage), serves embeddings
+    okf-server / okf-search --read--> bundle directory (via okf-storage)
 
 Changes on disk are detected by `notify` and broadcast to WebSocket clients, so
 the UI can offer a reload. See [Hot reload](api/websocket.md).
