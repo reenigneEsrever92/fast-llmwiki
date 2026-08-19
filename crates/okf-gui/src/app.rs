@@ -427,6 +427,44 @@ fn Page() -> impl IntoView {
         move |(id, _)| crate::api_client::to_send_future(async move { fetch_page(&id).await }),
     );
 
+    // Preserve the window scroll offset across an in-place hot reload of the
+    // current page. `page_reload` advances only when `HotReload` decides the
+    // current path is affected by a bundle change while the route stays the
+    // same; navigation changes the route without touching `page_reload`.
+    #[cfg(feature = "hydrate")]
+    {
+        Effect::new(move |prev: Option<(String, u64)>| {
+            let cur = (
+                params.get().get("rest").unwrap_or_default(),
+                page_reload.get(),
+            );
+
+            let is_reload = matches!(
+                prev,
+                Some((prev_id, prev_reload)) if prev_id == cur.0 && cur.1 > prev_reload
+            );
+
+            if is_reload {
+                if let Some(window) = web_sys::window() {
+                    if let Ok(y) = window.scroll_y() {
+                        wasm_bindgen_futures::spawn_local(async move {
+                            // Wait for the reload's fetch to finish so the offset
+                            // is applied to the new content, not the old one.
+                            data.ready().await;
+                            if let Some(window) = web_sys::window() {
+                                request_animation_frame(move || {
+                                    let _ = window.scroll_to_with_x_and_y(0.0, y);
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
+            cur
+        });
+    }
+
     view! {
         <Suspense fallback=move || view! { <p class="muted">"Loading…"</p> }>
             {move || match data.get() {
