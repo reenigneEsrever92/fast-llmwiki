@@ -26,3 +26,4 @@ See [Contributing](../contributing.md) for how to propose a feature.
 - [Specifications](specs/) — feature specs.
 - [Plans](plans/) — technical plans and implementation steps.
 - [Decisions](decisions/) — architecture decision records.
+- [Releases](releases.md) — how release binaries are built and published.

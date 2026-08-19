@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain with wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      # Keep in sync with the `wasm-bindgen` crate version in `Cargo.lock`.
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version 0.2.127
+
+      - name: Run unit tests
+        run: cargo test --workspace
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: okf-linux-x86_64
+            ext: tar.gz
+            binary: okf
+          - os: windows-latest
+            name: okf-windows-x86_64
+            ext: zip
+            binary: okf.exe
+          - os: macos-latest
+            name: okf-macos-aarch64
+            ext: tar.gz
+            binary: okf
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain with wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      # Keep in sync with the `wasm-bindgen` crate version in `Cargo.lock`.
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version 0.2.127
+
+      - name: Build release binary
+        run: cargo build --release -p okf-cli
+
+      - name: Package archive (Unix)
+        if: matrix.ext == 'tar.gz'
+        shell: bash
+        run: |
+          cd target/release
+          tar -czf "${{ matrix.name }}.tar.gz" "${{ matrix.binary }}"
+
+      - name: Package archive (Windows)
+        if: matrix.ext == 'zip'
+        shell: pwsh
+        run: |
+          cd target/release
+          Compress-Archive -Path "${{ matrix.binary }}" -DestinationPath "${{ matrix.name }}.zip"
+
+      - name: Upload release asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: target/release/${{ matrix.name }}.${{ matrix.ext }}
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            artifacts/okf-linux-x86_64.tar.gz \
+            artifacts/okf-windows-x86_64.zip \
+            artifacts/okf-macos-aarch64.tar.gz \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

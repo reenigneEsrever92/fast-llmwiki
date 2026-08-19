@@ -67,8 +67,8 @@ cached.
     cargo run -p okf-cli -- install
 
 This writes the agent skills embedded in this repository (for example `okf-dev`,
-`okf-plan`, and `okf-spec`) into `.agents/skills/` in the current directory, one
-`SKILL.md` per skill. Pass `--dir` to install elsewhere:
+`okf-init`, `okf-plan`, and `okf-spec`) into `.agents/skills/` in the current
+directory, one `SKILL.md` per skill. Pass `--dir` to install elsewhere:
 
     cargo run -p okf-cli -- install --dir ~/.agents/skills
 

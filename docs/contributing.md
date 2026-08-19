@@ -47,3 +47,7 @@ Before opening the pull request, verify with:
 
 When the feature ships, set the plan's `state` to `done` and the spec and plan
 `status` to `stable`. See the bundled `okf-dev` skill for the full workflow.
+
+Continuous integration runs the build and unit tests on every push to `main`
+and every pull request, and a [release workflow](dev/releases.md) publishes
+platform binaries from `v*` tags.

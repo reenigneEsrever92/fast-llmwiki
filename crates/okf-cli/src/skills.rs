@@ -31,6 +31,7 @@ macro_rules! include_skills {
 
 include_skills! {
     "okf-dev" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-dev/SKILL.md"),
+    "okf-init" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-init/SKILL.md"),
     "okf-plan" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-plan/SKILL.md"),
     "okf-spec" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-spec/SKILL.md"),
 }
@@ -43,6 +44,7 @@ mod tests {
     fn embeds_every_bundled_skill() {
         let names: Vec<&str> = SKILLS.iter().map(|s| s.name).collect();
         assert!(names.contains(&"okf-dev"));
+        assert!(names.contains(&"okf-init"));
         assert!(names.contains(&"okf-plan"));
         assert!(names.contains(&"okf-spec"));
     }

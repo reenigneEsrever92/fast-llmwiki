@@ -2,7 +2,7 @@
 type: Specification
 title: Automated test, build, and release pipeline
 description: A GitHub Actions pipeline that tests, builds, and publishes OKF release binaries for Linux, macOS, and Windows.
-status: draft
+status: stable
 tags: [dev, ci, release]
 owner: human:felix
 ---
