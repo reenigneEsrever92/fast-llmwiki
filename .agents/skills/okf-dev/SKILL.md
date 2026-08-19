@@ -1,26 +1,28 @@
 ---
 name: okf-dev
-description: Implement an OKF project task — find a state:todo task under docs/dev/tasks, read its linked spec under docs/dev/specs, implement it, run the build/tests, and update the task.
+description: Implement an OKF project plan — find a state:todo plan under docs/dev/plans, read its linked spec under docs/dev/specs, implement it, run the build/tests, and update the plan.
 ---
 
 # OKF Development
 
-Work is described by `type: Task` concepts in `docs/dev/tasks/` and
+Work is described by `type: Plan` concepts in `docs/dev/plans/` and
 `type: Specification` concepts in `docs/dev/specs/`. The docs are themselves an
 OKF bundle served by this project.
 
 ## 1. Find work
 
-    grep -rl "^state: todo" docs/dev/tasks
-    grep -rl "^state: blocked" docs/dev/tasks
+    grep -rl "^state: todo" docs/dev/plans
+    grep -rl "^state: blocked" docs/dev/plans
 
 Pick the highest `priority`. If none exist, check `docs/dev/roadmap.md` for what
-to spec next and write it first with the `okf-spec` skill.
+to spec next, write it first with the `okf-spec` skill, then plan it with the
+`okf-plan` skill.
 
-## 2. Read the spec
+## 2. Read the spec and plan
 
-Follow the markdown link in the task to its spec. Read `# Problem`,
-`# Requirements`, and `# Acceptance Criteria` before writing code.
+Follow the markdown link in the plan to its spec. Read `# Problem`,
+`# Requirements`, and `# Acceptance Criteria`, then the plan's `# Approach` and
+`# Steps` before writing code.
 
 ## 3. Implement
 
@@ -35,7 +37,7 @@ that satisfies the acceptance criteria, and add or update tests.
 
 ## 5. Update the docs
 
-- Set the task's `state: done` and `status: stable`.
+- Set the plan's `state: done` and `status: stable`.
 - Add `verified: { by: <actor>, at: <ISO-8601 timestamp> }`.
 - If the feature shipped, set the spec's `status: stable`.
-- Link the commit in the task body.
+- Link the commit in the plan body.

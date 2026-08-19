@@ -27,7 +27,8 @@ Create `docs/dev/specs/<slug>.md`.
 - `# Acceptance Criteria` — testable Given/When/Then statements.
 - `# Out of scope` — what is explicitly excluded.
 
-## Link tasks
+## Next steps
 
-Create a matching task in `docs/dev/tasks/` and link back to the spec with a
-markdown link. See the `okf-dev` skill for how tasks are implemented.
+A spec is the “what”. Write the “how” separately with the `okf-plan` skill,
+which creates a matching `type: Plan` in `docs/dev/plans/` and links back to
+this spec.

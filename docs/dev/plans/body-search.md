@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add body search to FsBundle::search
 status: draft
 state: todo

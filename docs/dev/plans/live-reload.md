@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Auto-refresh the sidebar and the current page on bundle changes
 status: stable
 state: done

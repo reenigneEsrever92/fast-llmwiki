@@ -9,8 +9,8 @@ owner: human:felix
 
 # Problem
 
-The repository ships agent skills under `.agents/skills/` (for example `okf-dev`
-and `okf-spec`). They live as loose `SKILL.md` files in the checkout, so a user
+The repository ships agent skills under `.agents/skills/` (for example `okf-dev`,
+`okf-plan`, and `okf-spec`). They live as loose `SKILL.md` files in the checkout, so a user
 who wants those skills activated in a project (for example under that project's
 `.agents/skills` directory) must copy them by hand. There is no command that
 installs them, and the skills are not bundled into any binary.

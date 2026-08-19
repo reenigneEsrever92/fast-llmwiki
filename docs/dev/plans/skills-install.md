@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add an `okf install` subcommand for bundled agent skills
 status: stable
 state: done

@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Give the main content column a consistent width on wide screens
 status: stable
 state: done

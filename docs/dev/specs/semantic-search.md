@@ -45,19 +45,6 @@ must be a dedicated `okf-search` crate launched by `okf-cli`, the same way
   reused from the crate, logging initialized once, a bind failure fails with a
   clear error naming the address, and SIGINT/SIGTERM shuts everything down.
 
-# Technology
-
-- Embeddings are computed in-process with [`fastembed`](https://crates.io/crates/fastembed)
-  (ONNX Runtime backend), using a small local model such as
-  `BAAI/bge-small-en-v1.5` (384 dimensions).
-- Similarity is cosine similarity over the embedding vectors.
-- Results are ranked by brute-force cosine similarity in memory. The index MUST
-  sit behind a small trait so it can be swapped for an approximate nearest
-  neighbor index (e.g. `usearch`/HNSW) if the bundle grows large.
-- Model weights are cached locally. On first run `fastembed` downloads them from
-  Hugging Face; for air-gapped use the model MUST be vendorable or a cache
-  directory pre-populated.
-
 # Acceptance Criteria
 
 - Given a query whose meaning matches a concept only in its body (not in its

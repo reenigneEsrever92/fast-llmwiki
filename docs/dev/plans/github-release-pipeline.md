@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add GitHub Actions CI and release workflows
 status: draft
 state: todo

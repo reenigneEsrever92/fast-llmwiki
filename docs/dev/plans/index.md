@@ -1,4 +1,4 @@
-# Tasks
+# Plans
 
 - [Body search](body-search.md)
 - [Add okf-search crate and wire semantic search into the CLI](semantic-search.md)

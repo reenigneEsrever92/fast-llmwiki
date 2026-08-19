@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add a persistent sidebar for bundle navigation
 status: stable
 state: done

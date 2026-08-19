@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Serve a hydrated SPA from a single binary
 status: stable
 state: done

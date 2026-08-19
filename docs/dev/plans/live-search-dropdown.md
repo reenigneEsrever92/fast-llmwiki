@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add a live search dropdown and drop the redundant search-page input
 status: stable
 state: done

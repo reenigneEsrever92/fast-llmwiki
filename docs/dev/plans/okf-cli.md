@@ -1,5 +1,5 @@
 ---
-type: Task
+type: Plan
 title: Add okf-cli crate to launch server, GUI, or both
 status: stable
 state: done

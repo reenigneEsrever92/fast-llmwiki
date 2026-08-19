@@ -364,12 +364,12 @@ mod tests {
         let mut dirs = HashSet::new();
         dirs.insert(String::new());
         dirs.insert("dev".to_string());
-        dirs.insert("dev/tasks".to_string());
+        dirs.insert("dev/plans".to_string());
 
         let mut concepts = HashMap::new();
         concepts.insert("root-concept".to_string(), concept("root-concept", "Root"));
         concepts.insert("dev/child".to_string(), concept("dev/child", "Child"));
-        concepts.insert("dev/tasks/leaf".to_string(), concept("dev/tasks/leaf", "Leaf"));
+        concepts.insert("dev/plans/leaf".to_string(), concept("dev/plans/leaf", "Leaf"));
 
         let tree = build_tree("", &dirs, &concepts);
 
@@ -386,12 +386,12 @@ mod tests {
         assert_eq!(dev.concepts[0].id, "dev/child");
         assert_eq!(dev.children.len(), 1);
 
-        let tasks = &dev.children[0];
-        assert_eq!(tasks.path, "dev/tasks");
-        assert_eq!(tasks.name, "tasks");
-        assert_eq!(tasks.concepts.len(), 1);
-        assert_eq!(tasks.concepts[0].id, "dev/tasks/leaf");
-        assert!(tasks.children.is_empty());
+        let plans = &dev.children[0];
+        assert_eq!(plans.path, "dev/plans");
+        assert_eq!(plans.name, "plans");
+        assert_eq!(plans.concepts.len(), 1);
+        assert_eq!(plans.concepts[0].id, "dev/plans/leaf");
+        assert!(plans.children.is_empty());
     }
 
     #[test]
