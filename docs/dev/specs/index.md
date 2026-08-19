@@ -4,5 +4,7 @@
 - [Semantic search across the bundle](semantic-search.md)
 - [Unified CLI launcher](okf-cli.md)
 - [Sidebar navigation](sidebar-navigation.md)
-- [Live reload and change notifications](live-reload.md)
+- [Live reload](live-reload.md)
 - [Client-side navigation](client-side-navigation.md)
+- [Main content width](main-content-width.md)
+- [Live search dropdown in the header](live-search-dropdown.md)

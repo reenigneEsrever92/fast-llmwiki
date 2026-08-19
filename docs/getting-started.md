@@ -14,16 +14,17 @@ A recent Rust toolchain. The workspace is defined in the repository root.
 
 ## Run everything
 
-The unified `okf` CLI starts the API, web UI, and semantic search together in
-one process:
+The unified `okf` CLI starts the REST API, web UI, and semantic search together
+in one process, merged onto a single socket:
 
     cargo run -p okf-cli
 
-The API is served at <http://127.0.0.1:8080/api/>, the web UI at
-<http://127.0.0.1:8081>, and the semantic search API at
-<http://127.0.0.1:8082/api/search/semantic>. The web UI is wired to query the
-API at the server's bind address automatically. Press `Ctrl-C` to stop all
-three.
+Everything is served at <http://127.0.0.1:8080>: the web UI, the REST API under
+`/api/`, and semantic search under `/api/search/semantic`. The web UI queries
+the API on the same origin automatically. Press `Ctrl-C` to stop.
+
+To run the components on separate sockets, use the `server`, `gui`, and `search`
+subcommands below.
 
 ## Run the REST API only
 
@@ -63,6 +64,7 @@ cached.
 
 # Examples
 
+    # with `cargo run -p okf-cli` (everything on 8080)
     curl http://127.0.0.1:8080/api/concepts/overview
     curl 'http://127.0.0.1:8080/api/search?q=trust'
-    curl 'http://127.0.0.1:8082/api/search/semantic?q=revenue'
+    curl 'http://127.0.0.1:8080/api/search/semantic?q=revenue'

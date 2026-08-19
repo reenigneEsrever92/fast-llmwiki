@@ -38,4 +38,5 @@ is what makes client-side navigation work without a proxy.
     okf-server / okf-search --read--> bundle directory (via okf-storage)
 
 Changes on disk are detected by `notify` and broadcast to WebSocket clients, so
-the UI can offer a reload. See [Hot reload](api/websocket.md).
+the UI can reload the sidebar and the current page automatically. See
+[Hot reload](api/websocket.md).

@@ -12,7 +12,9 @@ use axum::{
 };
 use chrono::NaiveDate;
 use futures::{SinkExt, StreamExt};
-use okf_core::dto::{ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse};
+use okf_core::dto::{
+    ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
+};
 use okf_core::render_markdown;
 use okf_storage::{BundleSource, ChangeEvent, DirListing, FsBundle, TreeNode};
 use serde::Deserialize;
@@ -151,7 +153,10 @@ async fn handle_socket(socket: axum::extract::ws::WebSocket) {
                     Ok(ChangeEvent { paths }) => {
                         if let Some(w) = &watched {
                             if paths.iter().any(|p| is_affected(w, p)) {
-                                let payload = serde_json::json!({ "type": "change", "path": w });
+                                // Include the full affected-path set so a client
+                                // watching the bundle root ("") can decide which
+                                // of its pages actually need to re-fetch.
+                                let payload = serde_json::json!({ "type": "change", "path": w, "paths": paths });
                                 if sender.send(Message::Text(payload.to_string().into())).await.is_err() {
                                     break;
                                 }

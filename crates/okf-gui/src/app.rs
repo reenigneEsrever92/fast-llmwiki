@@ -6,7 +6,9 @@ use leptos_router::{
     SsrMode, StaticSegment, WildcardSegment,
 };
 use okf_core::concept::TrustTier;
-use okf_core::dto::{ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse};
+use okf_core::dto::{
+    ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
+};
 
 use crate::api_client::{fetch_page, fetch_search, fetch_tree, PageData};
 
@@ -18,7 +20,7 @@ body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-seri
 .brand { font-weight:700; font-size:1.05rem; color:var(--fg); text-decoration:none; }
 .search { flex:1; display:flex; }
 .search input { width:100%; max-width:26rem; padding:0.4rem 0.75rem; border:1px solid var(--border); border-radius:6px; font-size:0.95rem; }
-.content { max-width:56rem; margin:0 auto; padding:1.5rem 1.25rem 4rem; }
+.content { flex:1 1 0%; min-width:0; max-width:56rem; margin:0 auto; padding:1.5rem 1.25rem 4rem; }
 .muted { color:var(--muted); font-size:0.85rem; }
 .badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:9999px; font-size:0.72rem; font-weight:600; }
 .badge.type { background:#eef2ff; color:#3730a3; }
@@ -101,6 +103,8 @@ pub fn App() -> impl IntoView {
     let sidebar_open = RwSignal::new(false);
     let reload = RwSignal::new(0u64);
     provide_context(reload);
+    let page_reload = RwSignal::new(0u64);
+    provide_context(page_reload);
 
     view! {
         <Router>
@@ -137,36 +141,10 @@ pub fn App() -> impl IntoView {
 fn Sidebar(open: RwSignal<bool>) -> impl IntoView {
     let reload = use_context::<RwSignal<u64>>().expect("reload signal not provided");
 
-    let tree = Resource::new(move || reload.get(), move |_| {
-        crate::api_client::to_send_future(async move { fetch_tree().await })
-    });
-
-    // On the client, watch the bundle root and refetch the tree whenever the
-    // bundle changes on disk.
-    #[cfg(feature = "hydrate")]
-    {
-        let reload = reload;
-        wasm_bindgen_futures::spawn_local(async move {
-            let Some(window) = web_sys::window() else { return };
-            let Ok(origin) = window.location().origin() else { return };
-            let ws_url = origin.replace("http", "ws") + "/api/ws";
-            let Ok(mut ws) = gloo_net::websocket::futures::WebSocket::open(&ws_url) else { return };
-
-            use futures::{SinkExt, StreamExt};
-            let watch = serde_json::json!({ "type": "watch", "path": "" });
-            let _ = ws
-                .send(gloo_net::websocket::Message::Text(watch.to_string()))
-                .await;
-
-            while let Some(Ok(msg)) = ws.next().await {
-                if let gloo_net::websocket::Message::Text(text) = msg {
-                    if text.contains("change") {
-                        reload.update(|v| *v += 1);
-                    }
-                }
-            }
-        });
-    }
+    let tree = Resource::new(
+        move || reload.get(),
+        move |_| crate::api_client::to_send_future(async move { fetch_tree().await }),
+    );
 
     let location = use_location();
     let pathname = location.pathname;
@@ -201,8 +179,16 @@ fn Sidebar(open: RwSignal<bool>) -> impl IntoView {
 fn TreeItem(node: TreeNodeResponse, pathname: Memo<String>) -> impl IntoView {
     let is_root = node.path.is_empty();
     let path = node.path.clone();
-    let name = if is_root { "Home".to_string() } else { node.name.clone() };
-    let href = if is_root { "/".to_string() } else { format!("/{path}/") };
+    let name = if is_root {
+        "Home".to_string()
+    } else {
+        node.name.clone()
+    };
+    let href = if is_root {
+        "/".to_string()
+    } else {
+        format!("/{path}/")
+    };
     let has_children = !node.children.is_empty() || !node.concepts.is_empty();
 
     let expanded = RwSignal::new(false);
@@ -305,10 +291,12 @@ fn ConceptLeaf(summary: ConceptSummaryResponse, pathname: Memo<String>) -> impl 
 #[component]
 fn Page() -> impl IntoView {
     let params = use_params_map();
+    let page_reload = use_context::<RwSignal<u64>>().expect("page reload signal not provided");
     let id = move || params.get().get("rest").unwrap_or_default();
-    let data = Resource::new(id, move |id| {
-        crate::api_client::to_send_future(async move { fetch_page(&id).await })
-    });
+    let data = Resource::new(
+        move || (id(), page_reload.get()),
+        move |(id, _)| crate::api_client::to_send_future(async move { fetch_page(&id).await }),
+    );
 
     view! {
         <Suspense fallback=move || view! { <p class="muted">"Loading…"</p> }>
@@ -405,7 +393,10 @@ fn ConceptView(concept: ConceptResponse) -> impl IntoView {
     let tags = concept.tags;
     let description = concept.description;
     let resource = concept.resource;
-    let stale_after = concept.stale_after.map(|d| d.to_string()).unwrap_or_default();
+    let stale_after = concept
+        .stale_after
+        .map(|d| d.to_string())
+        .unwrap_or_default();
     let generated = concept
         .generated
         .as_ref()
@@ -579,61 +570,86 @@ fn NotFound() -> impl IntoView {
 
 #[component]
 fn HotReload() -> impl IntoView {
-    let toast = RwSignal::new(None::<String>);
-
     #[cfg(feature = "hydrate")]
     {
-        // Read the current path from the router location (not route params):
+        let reload = use_context::<RwSignal<u64>>().expect("reload signal not provided");
+        let page_reload = use_context::<RwSignal<u64>>().expect("page reload signal not provided");
         // `HotReload` is rendered outside any matched route, so `use_params_map`
-        // would panic during hydration.
-        let path = use_location().pathname.get_untracked();
-        let toast_signal = toast;
+        // would panic during hydration; read the reactive location instead.
+        let pathname = use_location().pathname;
+
         wasm_bindgen_futures::spawn_local(async move {
-            let Some(window) = web_sys::window() else { return };
-            let Ok(origin) = window.location().origin() else { return };
+            let Some(window) = web_sys::window() else {
+                return;
+            };
+            let Ok(origin) = window.location().origin() else {
+                return;
+            };
             let ws_url = origin.replace("http", "ws") + "/api/ws";
-            let Ok(mut ws) = gloo_net::websocket::futures::WebSocket::open(&ws_url) else { return };
+            let Ok(mut ws) = gloo_net::websocket::futures::WebSocket::open(&ws_url) else {
+                return;
+            };
 
             use futures::{SinkExt, StreamExt};
-            let watch = serde_json::json!({ "type": "watch", "path": path });
+            // Watch the bundle root: a single shared connection notifies both the
+            // sidebar and the page watcher, and the affected-path list tells us
+            // which page (if any) needs to re-fetch.
+            let watch = serde_json::json!({ "type": "watch", "path": "" });
             let _ = ws
                 .send(gloo_net::websocket::Message::Text(watch.to_string()))
                 .await;
 
             while let Some(Ok(msg)) = ws.next().await {
-                if let gloo_net::websocket::Message::Text(text) = msg {
-                    if text.contains("change") {
-                        toast_signal.set(Some("This page changed on disk.".to_string()));
-                        break;
-                    }
+                let gloo_net::websocket::Message::Text(text) = msg else {
+                    continue;
+                };
+                let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+                    continue;
+                };
+                if value.get("type").and_then(|t| t.as_str()) != Some("change") {
+                    continue;
+                }
+
+                // Any bundle change refreshes the sidebar tree.
+                reload.update(|v| *v += 1);
+
+                // Refresh the current page only when it is affected.
+                let affected: Vec<&str> = value
+                    .get("paths")
+                    .and_then(|p| p.as_array())
+                    .map(|arr| arr.iter().filter_map(|v| v.as_str()).collect())
+                    .unwrap_or_default();
+                let current = pathname.get_untracked();
+                if page_is_affected(&current, &affected) {
+                    page_reload.update(|v| *v += 1);
                 }
             }
         });
     }
 
-    view! {
-        {move || if let Some(msg) = toast.get() {
-            view! {
-                <div class="toast">
-                    <span>{msg}</span>
-                    <button on:click=move |_| reload_page()>"Reload"</button>
-                </div>
-            }.into_any()
-        } else {
-            ().into_any()
-        }}
-    }
+    ()
 }
 
+/// Whether a change to any of `affected` (paths from `ChangeEvent.paths`)
+/// affects the page at `current` (a URL pathname). Mirrors the server's
+/// `is_affected` matching so client and server agree on what is "unrelated".
 #[cfg(feature = "hydrate")]
-fn reload_page() {
-    if let Some(window) = web_sys::window() {
-        let _ = window.location().reload();
-    }
+fn page_is_affected(current: &str, affected: &[&str]) -> bool {
+    let w = current.trim_matches('/');
+    affected.iter().any(|changed| {
+        let c = changed.trim_matches('/');
+        if w.is_empty() {
+            return true;
+        }
+        if w == c {
+            return true;
+        }
+        if c.is_empty() {
+            return true;
+        }
+        w.starts_with(&format!("{c}/")) || c.starts_with(&format!("{w}/"))
+    })
 }
-
-#[cfg(not(feature = "hydrate"))]
-fn reload_page() {}
 
 fn trust_class(tier: TrustTier) -> &'static str {
     match tier {

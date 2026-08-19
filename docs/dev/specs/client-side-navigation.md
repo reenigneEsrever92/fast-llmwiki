@@ -2,7 +2,7 @@
 type: Specification
 title: Client-side navigation
 description: Serve a hydrated SPA from a single distributable binary.
-status: draft
+status: stable
 tags: [dev, gui]
 owner: human:felix
 ---

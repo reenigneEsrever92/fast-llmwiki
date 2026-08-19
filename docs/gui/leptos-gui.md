@@ -16,5 +16,6 @@ the browser. It does not touch the bundle directly.
 
 # Hot reload
 
-On hydration it opens the [WebSocket](../api/websocket.md), watches the current
-path, and shows a reload toaster when a change arrives.
+On hydration it opens a single [WebSocket](../api/websocket.md) connection that
+watches the bundle root. Every change re-fetches the sidebar tree, and a change
+that affects the currently-viewed page re-fetches that page in place.
