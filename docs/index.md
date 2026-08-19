@@ -9,6 +9,7 @@ built with Rust, axum, and Leptos.
 - [Getting started](getting-started.md) — run the API server and the web UI.
 - [Architecture](architecture.md) — the crate layout and data flow.
 - [Features](features.md) — what the server does.
+- [Contributing](contributing.md) — how to propose and land a feature.
 
 ## Reference
 

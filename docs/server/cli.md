@@ -17,6 +17,7 @@ single socket, or any one of them on its own.
     okf server          # REST API only (127.0.0.1:8080)
     okf gui             # web UI only (127.0.0.1:8081)
     okf search          # semantic search only (127.0.0.1:8082)
+    okf install         # install bundled agent skills (./.agents/skills)
 
 When no subcommand is given, `okf` merges all three routers and serves them on
 one socket, so the web UI and its API share an origin.
@@ -31,6 +32,10 @@ one socket, so the web UI and its API share an origin.
 | `gui` | `--bind` | `127.0.0.1:8081` | Address to listen on. |
 | `search` | `--data` | `./docs` | The bundle directory. |
 | `search` | `--bind` | `127.0.0.1:8082` | Address to listen on. |
+| `install` | `--dir` | `.agents/skills` | Directory to install bundled skills into. |
+
+`okf install` writes every agent skill embedded in the binary to
+`<dir>/<name>/SKILL.md`, one directory per skill.
 
 ## Standalone binaries
 

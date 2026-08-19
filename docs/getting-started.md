@@ -62,6 +62,18 @@ The semantic search API is served at <http://127.0.0.1:8082/api/search/semantic>
 On first run the local embedding model is downloaded from Hugging Face and
 cached.
 
+## Install the bundled agent skills
+
+    cargo run -p okf-cli -- install
+
+This writes the agent skills embedded in this repository (for example `okf-dev`
+and `okf-spec`) into `.agents/skills/` in the current directory, one `SKILL.md`
+per skill. Pass `--dir` to install elsewhere:
+
+    cargo run -p okf-cli -- install --dir ~/.agents/skills
+
+See [CLI](server/cli.md) for all flags.
+
 # Examples
 
     # with `cargo run -p okf-cli` (everything on 8080)

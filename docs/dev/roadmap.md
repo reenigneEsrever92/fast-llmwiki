@@ -12,5 +12,7 @@ tags: [dev]
 
 # Next
 
+- Automated test, build, and release pipeline (see
+  [spec](specs/github-release-pipeline.md)).
 - Surface dev fields (`state`, `priority`, `owner`) as badges in the web UI.
 - Relevance-ranked search results.

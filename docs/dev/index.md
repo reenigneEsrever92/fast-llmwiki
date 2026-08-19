@@ -3,6 +3,10 @@
 This directory drives development. It is itself an OKF bundle: every concept has
 YAML front matter and is machine-readable.
 
+## Contributing
+
+See [Contributing](../contributing.md) for how to propose a feature.
+
 ## Workflow
 
 1. Find a task in [tasks](tasks/) with `state: todo` (or `blocked`).

@@ -8,3 +8,5 @@
 - [Client-side navigation](client-side-navigation.md)
 - [Main content width](main-content-width.md)
 - [Live search dropdown in the header](live-search-dropdown.md)
+- [Install bundled agent skills from the CLI](skills-install.md)
+- [Automated test, build, and release pipeline](github-release-pipeline.md)

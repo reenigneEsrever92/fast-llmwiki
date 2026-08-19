@@ -4,6 +4,8 @@
 //! `okf-search` into a single `okf` binary. Logging is initialized by the
 //! binary, never by the library startup functions.
 
+mod skills;
+
 use clap::{Args, Parser, Subcommand};
 
 /// The unified `okf` entry point.
@@ -30,6 +32,8 @@ pub enum Command {
     Gui(GuiArgs),
     /// Start the semantic search API only.
     Search(SearchArgs),
+    /// Install the agent skills bundled in this binary.
+    Install(InstallArgs),
 }
 
 #[derive(Debug, Args)]
@@ -65,6 +69,13 @@ pub struct SearchArgs {
     pub bind: String,
 }
 
+#[derive(Debug, Args)]
+pub struct InstallArgs {
+    /// Directory to install skills into.
+    #[arg(long, default_value = ".agents/skills")]
+    pub dir: std::path::PathBuf,
+}
+
 /// Dispatch the parsed CLI, running the selected component(s) until they exit
 /// or a termination signal arrives.
 pub async fn run(cli: Cli) -> anyhow::Result<()> {
@@ -87,8 +98,28 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
                 _ = shutdown_signal() => Ok(()),
             }
         }
+        Some(Command::Install(args)) => install_skills(&args.dir),
         None => run_all(cli.data, cli.bind).await,
     }
+}
+
+/// Install every skill embedded in the binary into `dir`, one `SKILL.md` per
+/// nested `<dir>/<name>/` directory. Re-runs overwrite existing files.
+fn install_skills(dir: &std::path::Path) -> anyhow::Result<()> {
+    std::fs::create_dir_all(dir)
+        .map_err(|e| anyhow::anyhow!("failed to create {}: {e}", dir.display()))?;
+
+    for skill in skills::SKILLS {
+        let skill_dir = dir.join(skill.name);
+        std::fs::create_dir_all(&skill_dir)
+            .map_err(|e| anyhow::anyhow!("failed to create {}: {e}", skill_dir.display()))?;
+        let dest = skill_dir.join("SKILL.md");
+        std::fs::write(&dest, skill.content)
+            .map_err(|e| anyhow::anyhow!("failed to write {}: {e}", dest.display()))?;
+        println!("installed skill {} -> {}", skill.name, dest.display());
+    }
+
+    Ok(())
 }
 
 /// Start the REST API, web UI, and semantic search on a single socket.
@@ -193,5 +224,42 @@ mod tests {
     fn defaults_to_no_subcommand() {
         let cli = Cli::try_parse_from(["okf"]).unwrap();
         assert!(cli.command.is_none());
+    }
+
+    #[test]
+    fn parses_install_subcommand_with_default_dir() {
+        let cli = Cli::try_parse_from(["okf", "install"]).unwrap();
+        match cli.command {
+            Some(Command::Install(args)) => {
+                assert_eq!(args.dir, std::path::PathBuf::from(".agents/skills"));
+            }
+            _ => panic!("expected install subcommand"),
+        }
+    }
+
+    #[test]
+    fn parses_install_subcommand_with_dir() {
+        let cli = Cli::try_parse_from(["okf", "install", "--dir", "/tmp/skills"]).unwrap();
+        match cli.command {
+            Some(Command::Install(args)) => {
+                assert_eq!(args.dir, std::path::PathBuf::from("/tmp/skills"))
+            }
+            _ => panic!("expected install subcommand"),
+        }
+    }
+
+    #[test]
+    fn install_skills_writes_every_skill() {
+        let dir = std::env::temp_dir().join(format!("okf-cli-install-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+
+        install_skills(&dir).unwrap();
+
+        for skill in skills::SKILLS {
+            let dest = dir.join(skill.name).join("SKILL.md");
+            assert_eq!(std::fs::read_to_string(&dest).unwrap(), skill.content);
+        }
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

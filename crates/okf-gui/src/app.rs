@@ -1,9 +1,10 @@
 use leptos::prelude::*;
+use leptos::wasm_bindgen::JsCast;
 use leptos_meta::*;
 use leptos_router::{
     components::{Route, Router, Routes},
-    hooks::{use_location, use_params_map, use_query_map},
-    SsrMode, StaticSegment, WildcardSegment,
+    hooks::{use_location, use_navigate, use_params_map, use_query_map},
+    NavigateOptions, SsrMode, StaticSegment, WildcardSegment,
 };
 use okf_core::concept::TrustTier;
 use okf_core::dto::{
@@ -18,8 +19,15 @@ const STYLE: &str = r#"
 body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--fg); background:var(--bg); line-height:1.6; }
 .site-header { display:flex; align-items:center; gap:1rem; padding:0.75rem 1.25rem; border-bottom:1px solid var(--border); }
 .brand { font-weight:700; font-size:1.05rem; color:var(--fg); text-decoration:none; }
-.search { flex:1; display:flex; }
+.search { flex:1; display:flex; position:relative; }
 .search input { width:100%; max-width:26rem; padding:0.4rem 0.75rem; border:1px solid var(--border); border-radius:6px; font-size:0.95rem; }
+.search-dropdown { position:absolute; top:calc(100% + 0.35rem); left:0; z-index:600; width:100%; max-width:26rem; margin:0; padding:0; list-style:none; background:var(--bg); border:1px solid var(--border); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.12); max-height:20rem; overflow-y:auto; }
+.search-dropdown li { border-bottom:1px solid var(--border); }
+.search-dropdown li:last-child { border-bottom:none; }
+.search-dropdown a { display:block; padding:0.5rem 0.75rem; text-decoration:none; color:var(--fg); }
+.search-dropdown a:hover { background:#f3f4f6; }
+.search-dropdown .title { font-weight:600; font-size:0.9rem; }
+.search-dropdown .desc { color:var(--muted); font-size:0.82rem; margin-top:0.1rem; }
 .content { flex:1 1 0%; min-width:0; max-width:56rem; margin:0 auto; padding:1.5rem 1.25rem 4rem; }
 .muted { color:var(--muted); font-size:0.85rem; }
 .badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:9999px; font-size:0.72rem; font-weight:600; }
@@ -117,9 +125,7 @@ pub fn App() -> impl IntoView {
                     "☰"
                 </button>
                 <a class="brand" href="/">"OKF Bundle"</a>
-                <form class="search" action="/search" method="get">
-                    <input type="search" name="q" placeholder="Search concepts…" autocomplete="off"/>
-                </form>
+                <HeaderSearch/>
             </header>
             <div class="layout">
                 <Sidebar open=sidebar_open/>
@@ -134,6 +140,114 @@ pub fn App() -> impl IntoView {
             <footer class="site-footer">"OKF Bundle · read-only"</footer>
             <HotReload/>
         </Router>
+    }
+}
+
+#[component]
+fn HeaderSearch() -> impl IntoView {
+    let query_map = use_query_map();
+    let navigate = use_navigate();
+
+    // The header field is the single source of truth for the query. Initialize
+    // it from the URL so it shows the active query on the search page during
+    // both SSR and hydration.
+    let input = RwSignal::new(query_map.get_untracked().get("q").unwrap_or_default());
+    let open = RwSignal::new(false);
+
+    // Keep the field in sync with the URL query on client-side navigation: it
+    // clears when leaving a search page and follows deep links when arriving.
+    Effect::new(move |_| {
+        let q = query_map.get().get("q").unwrap_or_default();
+        input.set(q);
+    });
+
+    let results = Resource::new(
+        move || input.get(),
+        move |q| crate::api_client::to_send_future(async move { fetch_search(&q).await }),
+    );
+
+    let container = NodeRef::<leptos::html::Form>::new();
+
+    // Close the dropdown when the user clicks anywhere outside the search form.
+    let handle = window_event_listener(leptos::ev::click, {
+        let container = container;
+        let open = open;
+        move |event: leptos::web_sys::MouseEvent| {
+            let Some(node) = event
+                .target()
+                .and_then(|t| t.dyn_into::<leptos::web_sys::Node>().ok())
+            else {
+                return;
+            };
+            if let Some(el) = container.get_untracked() {
+                if !el.contains(Some(&node)) {
+                    open.set(false);
+                }
+            }
+        }
+    });
+    on_cleanup(move || handle.remove());
+
+    let on_input = move |event: leptos::web_sys::Event| {
+        let value = event_target_value(&event);
+        input.set(value.clone());
+        open.set(!value.trim().is_empty());
+    };
+
+    let on_keydown = move |event: leptos::web_sys::KeyboardEvent| {
+        if event.key() == "Escape" {
+            open.set(false);
+        }
+    };
+
+    let on_submit = move |event: leptos::web_sys::SubmitEvent| {
+        event.prevent_default();
+        let query = input.get_untracked();
+        open.set(false);
+        if query.trim().is_empty() {
+            return;
+        }
+        let path = format!("/search?q={}", crate::api_client::urlencode(&query));
+        navigate(path.as_str(), NavigateOptions::default());
+    };
+
+    view! {
+        <form class="search" action="/search" method="get" node_ref=container on:submit=on_submit>
+            <input
+                type="search"
+                name="q"
+                placeholder="Search concepts…"
+                autocomplete="off"
+                value=move || input.get()
+                on:input=on_input
+                on:keydown=on_keydown
+            />
+            {move || {
+                if !open.get() || input.get().trim().is_empty() {
+                    ().into_any()
+                } else {
+                    match results.get() {
+                        Some(items) if !items.is_empty() => {
+                            view! {
+                                <ul class="search-dropdown">
+                                    <For each=move || items.clone().into_iter().take(8) key=|c| c.id.clone() let:item>
+                                        <li>
+                                            <a href=format!("/{}", item.id.clone())>
+                                                <div class="title">{item.title.clone()}</div>
+                                                {if let Some(desc) = item.description.clone() {
+                                                    view! { <div class="desc">{desc}</div> }.into_any()
+                                                } else { ().into_any() }}
+                                            </a>
+                                        </li>
+                                    </For>
+                                </ul>
+                            }.into_any()
+                        }
+                        _ => ().into_any(),
+                    }
+                }
+            }}
+        </form>
     }
 }
 
@@ -313,7 +427,6 @@ fn Page() -> impl IntoView {
 #[component]
 fn Search() -> impl IntoView {
     let query = use_query_map();
-    let value_query = query.clone();
     let q = move || query.get().get("q").unwrap_or_default();
 
     let results = Resource::new(q, move |q| {
@@ -323,9 +436,6 @@ fn Search() -> impl IntoView {
     view! {
         <nav><a href="/">"Home"</a></nav>
         <h1>"Search"</h1>
-        <form class="search" action="/search" method="get">
-            <input type="search" name="q" value=move || value_query.get().get("q").unwrap_or_default() autofocus/>
-        </form>
         <Suspense fallback=move || view! { <p class="muted">"Searching…"</p> }>
             {move || {
                 let items = results.get().unwrap_or_default();

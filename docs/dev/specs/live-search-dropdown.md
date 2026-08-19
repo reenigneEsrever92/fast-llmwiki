@@ -2,7 +2,7 @@
 type: Specification
 title: Live search dropdown in the header
 description: Show type-ahead results in the header search field, open a full results page on Enter, and remove the redundant in-page search field.
-status: draft
+status: stable
 tags: [dev, gui, search]
 owner: human:felix
 ---

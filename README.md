@@ -34,6 +34,7 @@ To run components individually:
 cargo run -p okf-cli -- server    # REST API only (127.0.0.1:8080)
 cargo run -p okf-cli -- gui       # web UI only (127.0.0.1:8081)
 cargo run -p okf-cli -- search    # semantic search only (127.0.0.1:8082)
+cargo run -p okf-cli -- install   # install bundled agent skills (./.agents/skills)
 ```
 
 See [Getting started](docs/getting-started.md) for details and

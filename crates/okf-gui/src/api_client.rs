@@ -7,7 +7,9 @@
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-use okf_core::dto::{ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse};
+use okf_core::dto::{
+    ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
+};
 
 #[cfg(feature = "ssr")]
 static API_BASE: std::sync::OnceLock<String> = std::sync::OnceLock::new();
@@ -84,10 +86,12 @@ pub async fn fetch_search(query: &str) -> Vec<ConceptSummaryResponse> {
 
 /// Fetch the full bundle directory tree for the navigation sidebar.
 pub async fn fetch_tree() -> TreeNodeResponse {
-    get_json::<TreeNodeResponse>("tree").await.unwrap_or_default()
+    get_json::<TreeNodeResponse>("tree")
+        .await
+        .unwrap_or_default()
 }
 
-fn urlencode(s: &str) -> String {
+pub(crate) fn urlencode(s: &str) -> String {
     s.chars()
         .map(|c| {
             if c.is_ascii_alphanumeric() || "-_.~".contains(c) {
