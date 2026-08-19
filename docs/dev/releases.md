@@ -34,6 +34,7 @@ Each archive encodes the platform and architecture of the binary inside it:
 | Asset | Platform | Runner | Archive |
 | --- | --- | --- | --- |
 | `okf-linux-x86_64` | Linux x86_64 (glibc) | `ubuntu-latest` | `.tar.gz` |
+| `okf-linux-aarch64` | Linux arm64 (glibc) | `ubuntu-24.04-arm` | `.tar.gz` |
 | `okf-windows-x86_64` | Windows x86_64 | `windows-latest` | `.zip` |
 | `okf-macos-aarch64` | macOS (Apple Silicon) | `macos-latest` | `.tar.gz` |
 

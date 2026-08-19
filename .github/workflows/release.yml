@@ -38,6 +38,10 @@ jobs:
             name: okf-linux-x86_64
             ext: tar.gz
             binary: okf
+          - os: ubuntu-24.04-arm
+            name: okf-linux-aarch64
+            ext: tar.gz
+            binary: okf
           - os: windows-latest
             name: okf-windows-x86_64
             ext: zip
@@ -100,6 +104,7 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" \
             artifacts/okf-linux-x86_64.tar.gz \
+            artifacts/okf-linux-aarch64.tar.gz \
             artifacts/okf-windows-x86_64.zip \
             artifacts/okf-macos-aarch64.tar.gz \
             --title "$GITHUB_REF_NAME" \

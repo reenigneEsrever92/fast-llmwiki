@@ -17,8 +17,8 @@ Implements [automated test, build, and release pipeline](/dev/specs/github-relea
 - [x] Add a release workflow (`.github/workflows/release.yml`) that triggers on
   `v*` tags and builds on native runners for Linux, Windows, and macOS.
 - [x] Produce named, archived release assets (`okf-linux-x86_64`,
-  `okf-windows-x86_64`, `okf-macos-aarch64`) with `.tar.gz`/`.zip` as
-  appropriate.
+  `okf-linux-aarch64`, `okf-windows-x86_64`, `okf-macos-aarch64`) with
+  `.tar.gz`/`.zip` as appropriate.
 - [x] Attach the built assets to a GitHub Release on the tagged ref.
 - [x] Guard the release so no asset is published when the build or tests fail.
 - [x] Document the release process and the asset naming scheme in

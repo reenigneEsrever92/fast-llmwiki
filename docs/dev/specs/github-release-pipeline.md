@@ -1,7 +1,7 @@
 ---
 type: Specification
 title: Automated test, build, and release pipeline
-description: A GitHub Actions pipeline that tests, builds, and publishes OKF release binaries for Linux, macOS, and Windows.
+description: A GitHub Actions pipeline that tests, builds, and publishes OKF release binaries for Linux (x86_64 and arm64), macOS, and Windows.
 status: stable
 tags: [dev, ci, release]
 owner: human:felix
@@ -37,11 +37,13 @@ build each platform on a matching native runner.
 - The following release binaries MUST be produced from the unified `okf` crate
   (`okf-cli`):
   - Linux x86_64 (glibc) on `ubuntu-latest`;
+  - Linux arm64 (glibc) on `ubuntu-24.04-arm`;
   - Windows x86_64 on `windows-latest`;
   - macOS on `macos-latest`.
 - Binaries MUST be named and archived so that the platform and architecture are
-  unambiguous (for example `okf-linux-x86_64`, `okf-windows-x86_64`,
-  `okf-macos-aarch64`), with `.tar.gz` archives on Unix and `.zip` on Windows.
+  unambiguous (for example `okf-linux-x86_64`, `okf-linux-aarch64`,
+  `okf-windows-x86_64`, `okf-macos-aarch64`), with `.tar.gz` archives on Unix and
+  `.zip` on Windows.
 - The release workflow MUST NOT publish artifacts when the build or tests fail.
 
 # Acceptance Criteria
@@ -64,6 +66,6 @@ build each platform on a matching native runner.
 - Code signing and notarization (including Windows Authenticode and macOS
   notarization).
 - Publishing to package registries such as crates.io, Homebrew, or Scoop.
-- Producing Linux musl, ARM, or container/Docker images.
+- Producing Linux musl, 32-bit ARM, or container/Docker images.
 - Semantic-release automation that computes version numbers; release builds are
   triggered by manually pushed `v*` tags.
