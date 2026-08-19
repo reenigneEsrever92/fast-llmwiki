@@ -85,6 +85,17 @@ table.src-table th { background:#f9fafb; }
 }
 "#;
 
+/// Signal that triggers the sidebar navigation tree to re-fetch on every bundle
+/// change. Wrapped in a newtype so [`provide_context`]/[`use_context`] (keyed by
+/// type) can tell it apart from [`PageReload`].
+#[derive(Copy, Clone)]
+struct SidebarReload(RwSignal<u64>);
+
+/// Signal that triggers the currently-viewed page to re-fetch only when its
+/// path is affected by a bundle change.
+#[derive(Copy, Clone)]
+struct PageReload(RwSignal<u64>);
+
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html>
@@ -109,9 +120,9 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     let sidebar_open = RwSignal::new(false);
-    let reload = RwSignal::new(0u64);
+    let reload = SidebarReload(RwSignal::new(0u64));
     provide_context(reload);
-    let page_reload = RwSignal::new(0u64);
+    let page_reload = PageReload(RwSignal::new(0u64));
     provide_context(page_reload);
 
     view! {
@@ -253,7 +264,9 @@ fn HeaderSearch() -> impl IntoView {
 
 #[component]
 fn Sidebar(open: RwSignal<bool>) -> impl IntoView {
-    let reload = use_context::<RwSignal<u64>>().expect("reload signal not provided");
+    let reload = use_context::<SidebarReload>()
+        .expect("reload signal not provided")
+        .0;
 
     let tree = Resource::new(
         move || reload.get(),
@@ -405,7 +418,9 @@ fn ConceptLeaf(summary: ConceptSummaryResponse, pathname: Memo<String>) -> impl 
 #[component]
 fn Page() -> impl IntoView {
     let params = use_params_map();
-    let page_reload = use_context::<RwSignal<u64>>().expect("page reload signal not provided");
+    let page_reload = use_context::<PageReload>()
+        .expect("page reload signal not provided")
+        .0;
     let id = move || params.get().get("rest").unwrap_or_default();
     let data = Resource::new(
         move || (id(), page_reload.get()),
@@ -682,8 +697,12 @@ fn NotFound() -> impl IntoView {
 fn HotReload() -> impl IntoView {
     #[cfg(feature = "hydrate")]
     {
-        let reload = use_context::<RwSignal<u64>>().expect("reload signal not provided");
-        let page_reload = use_context::<RwSignal<u64>>().expect("page reload signal not provided");
+        let reload = use_context::<SidebarReload>()
+            .expect("reload signal not provided")
+            .0;
+        let page_reload = use_context::<PageReload>()
+            .expect("page reload signal not provided")
+            .0;
         // `HotReload` is rendered outside any matched route, so `use_params_map`
         // would panic during hydration; read the reactive location instead.
         let pathname = use_location().pathname;

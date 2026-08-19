@@ -6,6 +6,7 @@
 - [Sidebar navigation](sidebar-navigation.md)
 - [Live reload](live-reload.md)
 - [Client-side navigation](client-side-navigation.md)
+- [Preserve scroll position on hot reload](preserve-scroll-on-reload.md)
 - [Main content width](main-content-width.md)
 - [Live search dropdown in the header](live-search-dropdown.md)
 - [Install bundled agent skills from the CLI](skills-install.md)

@@ -163,7 +163,11 @@ async fn handle_socket(socket: axum::extract::ws::WebSocket) {
                             }
                         }
                     }
-                    Err(_) => break,
+                    // The broadcast channel skipped some events because this
+                    // receiver fell behind; the next live change will still be
+                    // delivered, so keep serving rather than dropping the socket.
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
                 }
             }
         }

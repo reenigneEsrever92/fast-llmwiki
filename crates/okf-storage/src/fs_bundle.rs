@@ -52,6 +52,15 @@ impl FsBundle {
             ));
         }
 
+        // Canonicalize to an absolute, symlink-free path. The filesystem watcher
+        // reports changed paths as absolute (it joins the process cwd onto a
+        // relative watch root), and `affected_paths` strips this root as a
+        // prefix, so both sides must agree on the exact path. A relative `--data`
+        // path (e.g. "./docs") previously produced a root that did not prefix the
+        // watcher's absolute paths, so no change was ever broadcast.
+        let root = std::fs::canonicalize(&root)
+            .map_err(|e| anyhow::anyhow!("failed to canonicalize bundle directory: {e}"))?;
+
         let (change_tx, _) = broadcast::channel(64);
         let bundle = Arc::new(Self {
             root: root.clone(),
@@ -99,8 +108,8 @@ fn spawn_watcher(bundle: Arc<FsBundle>) {
     // into the async runtime through an mpsc channel.
     std::thread::spawn(move || {
         let (event_tx, event_rx) = std::sync::mpsc::channel::<PathBuf>();
-        let mut watcher = match notify::recommended_watcher(
-            move |res: notify::Result<notify::Event>| {
+        let mut watcher =
+            match notify::recommended_watcher(move |res: notify::Result<notify::Event>| {
                 if let Ok(event) = res {
                     if is_relevant(&event) {
                         for path in event.paths {
@@ -108,14 +117,13 @@ fn spawn_watcher(bundle: Arc<FsBundle>) {
                         }
                     }
                 }
-            },
-        ) {
-            Ok(w) => w,
-            Err(e) => {
-                tracing::warn!("failed to start file watcher: {e}");
-                return;
-            }
-        };
+            }) {
+                Ok(w) => w,
+                Err(e) => {
+                    tracing::warn!("failed to start file watcher: {e}");
+                    return;
+                }
+            };
         if let Err(e) = watcher.watch(&watch_root, RecursiveMode::Recursive) {
             tracing::warn!("failed to watch bundle directory: {e}");
             return;
@@ -163,7 +171,9 @@ fn is_relevant(event: &notify::Event) -> bool {
 fn affected_paths(root: &Path, changed: &[PathBuf]) -> Vec<String> {
     let mut out = HashSet::new();
     for path in changed {
-        let Ok(rel) = path.strip_prefix(root) else { continue };
+        let Ok(rel) = path.strip_prefix(root) else {
+            continue;
+        };
         let rel = rel_to_string(rel);
 
         if let Some(id) = rel.strip_suffix(".md") {
@@ -204,20 +214,27 @@ fn scan_bundle(root: &Path) -> ScannedBundle {
                 Ok(rel) => rel_to_string(rel),
                 Err(_) => continue,
             };
-            let Ok(file_type) = entry.file_type() else { continue };
+            let Ok(file_type) = entry.file_type() else {
+                continue;
+            };
 
             if file_type.is_dir() {
                 out.dirs.insert(rel);
                 stack.push(path);
-            } else if file_type.is_file() && path.extension().and_then(|e| e.to_str()) == Some("md") {
+            } else if file_type.is_file() && path.extension().and_then(|e| e.to_str()) == Some("md")
+            {
                 let Some(file_name) = path.file_name().and_then(|s| s.to_str()) else {
                     continue;
                 };
                 if file_name == "index.md" || file_name == "log.md" {
                     continue; // reserved files are read on demand
                 }
-                let Some(id) = rel.strip_suffix(".md") else { continue };
-                let Ok(content) = std::fs::read_to_string(&path) else { continue };
+                let Some(id) = rel.strip_suffix(".md") else {
+                    continue;
+                };
+                let Ok(content) = std::fs::read_to_string(&path) else {
+                    continue;
+                };
                 let concept = Concept::from_markdown(id, &content);
                 out.concepts.insert(id.to_string(), concept);
             }
@@ -331,8 +348,7 @@ impl BundleSource for FsBundle {
                 id.to_lowercase().contains(&q)
                     || c.title.to_lowercase().contains(&q)
                     || c.concept_type.to_lowercase().contains(&q)
-                    || c
-                        .description
+                    || c.description
                         .as_deref()
                         .map(|d| d.to_lowercase().contains(&q))
                         .unwrap_or(false)
@@ -369,7 +385,10 @@ mod tests {
         let mut concepts = HashMap::new();
         concepts.insert("root-concept".to_string(), concept("root-concept", "Root"));
         concepts.insert("dev/child".to_string(), concept("dev/child", "Child"));
-        concepts.insert("dev/plans/leaf".to_string(), concept("dev/plans/leaf", "Leaf"));
+        concepts.insert(
+            "dev/plans/leaf".to_string(),
+            concept("dev/plans/leaf", "Leaf"),
+        );
 
         let tree = build_tree("", &dirs, &concepts);
 
@@ -412,5 +431,30 @@ mod tests {
 
         let child_paths: Vec<&str> = tree.children.iter().map(|c| c.path.as_str()).collect();
         assert_eq!(child_paths, vec!["a", "b"]);
+    }
+
+    #[tokio::test]
+    async fn open_canonicalizes_the_root() {
+        let base =
+            std::env::temp_dir().join(format!("okf-open-canonicalize-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        std::fs::create_dir_all(base.join("docs")).unwrap();
+        std::fs::write(
+            base.join("docs").join("a.md"),
+            "---\ntype: T\ntitle: A\n---\nbody\n",
+        )
+        .unwrap();
+
+        // A path with an embedded `.` component (as `--data ./docs` is passed)
+        // must be canonicalized so the watcher and `affected_paths` agree on a
+        // single absolute prefix.
+        let relative = base.join(".").join("docs");
+        let bundle = FsBundle::open(&relative).await.unwrap();
+
+        let expected = std::fs::canonicalize(base.join("docs")).unwrap();
+        assert_eq!(bundle.root, expected);
+        assert!(bundle.root.is_absolute());
+
+        let _ = std::fs::remove_dir_all(&base);
     }
 }

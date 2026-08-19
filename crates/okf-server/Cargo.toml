@@ -20,3 +20,6 @@ serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
 futures.workspace = true
+
+[dev-dependencies]
+tokio-tungstenite = "0.29"
