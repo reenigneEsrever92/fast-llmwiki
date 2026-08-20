@@ -18,11 +18,11 @@ All responses are JSON.
 | GET | `/api/dirs` / `/api/dirs/{path}` | A directory listing (root or nested). |
 | GET | `/api/tree` | The full bundle tree for navigation. |
 | GET | `/api/search?q=` | Keyword search results. |
-| GET | `/api/search/semantic?q=` | Semantic search results (via `okf-search`). |
+| GET | `/api/search/semantic?q=` | Semantic search results (via `fawi-search`). |
 | GET | `/api/ws` | WebSocket upgrade for hot reload. |
 
 `/api/search` matches titles, types, descriptions, and tags.
-`/api/search/semantic` is provided by the `okf-search` crate and ranks results
+`/api/search/semantic` is provided by the `fawi-search` crate and ranks results
 by cosine similarity using a local embedding model; it is served on the same
 socket when running the merged `okf` binary.
 

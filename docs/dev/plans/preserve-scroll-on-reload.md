@@ -11,7 +11,7 @@ Implements [Preserve scroll position on hot reload](/dev/specs/preserve-scroll-o
 
 # Approach
 
-The fix lives entirely in `crates/okf-gui/src/app.rs`, in the `Page` component,
+The fix lives entirely in `crates/fawi-gui/src/app.rs`, in the `Page` component,
 and is gated on `#[cfg(feature = "hydrate")]` (no server-side behaviour changes,
 no new dependencies).
 
@@ -78,9 +78,9 @@ Restoration order in the effect:
       `request_animation_frame`.
 - [x] Confirm the initial run (`prev == None`) and navigation runs (id changed)
       do not capture or restore, so navigation is unaffected.
-- [x] Verify `cargo build -p okf-gui --features ssr`,
-      `cargo check -p okf-gui --features hydrate --target wasm32-unknown-unknown`,
-      and `cargo build -p okf-server` still pass.
+- [x] Verify `cargo build -p fawi-gui --features ssr`,
+      `cargo check -p fawi-gui --features hydrate --target wasm32-unknown-unknown`,
+      and `cargo build -p fawi-server` still pass.
 - [ ] Manually verify in the browser: scroll down a long page, edit its markdown
       on disk, and confirm the offset is preserved; then navigate to another page
       and confirm it starts at the top.

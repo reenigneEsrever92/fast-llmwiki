@@ -12,17 +12,17 @@ agent-maintained corpus.
 
 The project is a Cargo workspace with six crates under `crates/`:
 
-- [`okf-core`](crates/okf-core) — the OKF model, front matter parsing, Markdown rendering, and shared DTOs.
-- [`okf-storage`](crates/okf-storage) — the read-only bundle scanner (`FsBundle`) and filesystem change events.
-- [`okf-server`](crates/okf-server) — the REST API and WebSocket hot reload.
-- [`okf-gui`](crates/okf-gui) — the Leptos web UI (SSR + hydration).
-- [`okf-search`](crates/okf-search) — semantic search over local vector embeddings.
-- [`okf-cli`](crates/okf-cli) — the unified `okf` launcher that runs the server, GUI, and search together.
+- [`fawi-core`](crates/fawi-core) — the OKF model, front matter parsing, Markdown rendering, and shared DTOs.
+- [`fawi-storage`](crates/fawi-storage) — the read-only bundle scanner (`FsBundle`) and filesystem change events.
+- [`fawi-server`](crates/fawi-server) — the REST API and WebSocket hot reload.
+- [`fawi-gui`](crates/fawi-gui) — the Leptos web UI (SSR + hydration).
+- [`fawi-search`](crates/fawi-search) — semantic search over local vector embeddings.
+- [`fawi-cli`](crates/fawi-cli) — the unified `okf` launcher that runs the server, GUI, and search together.
 
 ## Running
 
 ```sh
-cargo run -p okf-cli
+cargo run -p fawi-cli
 ```
 
 This serves the REST API, web UI, and semantic search as one merged router on a
@@ -31,10 +31,10 @@ single socket at <http://127.0.0.1:8080>.
 To run components individually:
 
 ```sh
-cargo run -p okf-cli -- server    # REST API only (127.0.0.1:8080)
-cargo run -p okf-cli -- gui       # web UI only (127.0.0.1:8081)
-cargo run -p okf-cli -- search    # semantic search only (127.0.0.1:8082)
-cargo run -p okf-cli -- install   # install bundled agent skills (./.agents/skills)
+cargo run -p fawi-cli -- server    # REST API only (127.0.0.1:8080)
+cargo run -p fawi-cli -- gui       # web UI only (127.0.0.1:8081)
+cargo run -p fawi-cli -- search    # semantic search only (127.0.0.1:8082)
+cargo run -p fawi-cli -- install   # install bundled agent skills (./.agents/skills)
 ```
 
 See [Getting started](docs/getting-started.md) for details and
@@ -51,7 +51,7 @@ All responses are JSON.
 - `GET /api/search/semantic?q=` — semantic search over vector embeddings (via the search service).
 - `GET /api/ws` — WebSocket upgrade for hot reload.
 
-`/api/search/semantic` is provided by `okf-search` and is available when running
+`/api/search/semantic` is provided by `fawi-search` and is available when running
 the merged `okf` or `okf search`. See [REST API](docs/api/rest-api.md).
 
 ## Front matter

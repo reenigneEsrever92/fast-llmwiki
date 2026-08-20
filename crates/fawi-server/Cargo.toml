@@ -1,0 +1,25 @@
+[package]
+name = "fawi-server"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "fawi-server"
+path = "src/main.rs"
+
+[dependencies]
+fawi-storage = { path = "../fawi-storage" }
+fawi-core = { path = "../fawi-core" }
+anyhow.workspace = true
+axum.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+futures.workspace = true
+
+[dev-dependencies]
+tokio-tungstenite = "0.29"

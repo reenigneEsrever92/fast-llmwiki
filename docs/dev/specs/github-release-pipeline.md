@@ -16,7 +16,7 @@ and there are no prebuilt binaries for the three mainstream desktop platforms.
 
 A released `okf` binary is non-trivial to build: the SSR server embeds the
 client bundle via a nested `wasm32-unknown-unknown` build that also requires
-`wasm-bindgen-cli`, and `okf-search` depends on `fastembed`/ONNX Runtime native
+`wasm-bindgen-cli`, and `fawi-search` depends on `fastembed`/ONNX Runtime native
 binaries. A release pipeline therefore cannot naively cross-compile and must
 build each platform on a matching native runner.
 
@@ -26,7 +26,7 @@ build each platform on a matching native runner.
   pull request, and MUST fail the check when verification fails.
 - The CI workflow MUST:
   - install the `wasm32-unknown-unknown` target and `wasm-bindgen-cli`;
-  - build the workspace, including the `okf-gui` `ssr` feature;
+  - build the workspace, including the `fawi-gui` `ssr` feature;
   - run the unit tests.
 - A GitHub Actions **release workflow** MUST build and publish release binaries
   on tag pushes matching `v*` (semantic version tags).
@@ -35,7 +35,7 @@ build each platform on a matching native runner.
 - The release workflow MUST publish a GitHub Release on the tagged ref and
   attach the built binaries as release assets.
 - The following release binaries MUST be produced from the unified `okf` crate
-  (`okf-cli`):
+  (`fawi-cli`):
   - Linux x86_64 (glibc) on `ubuntu-latest`;
   - Linux arm64 (glibc) on `ubuntu-24.04-arm`;
   - Windows x86_64 on `windows-latest`;

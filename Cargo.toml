@@ -1,12 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/okf-core",
-    "crates/okf-storage",
-    "crates/okf-gui",
-    "crates/okf-server",
-    "crates/okf-cli",
-    "crates/okf-search",
+    "crates/fawi-core",
+    "crates/fawi-storage",
+    "crates/fawi-gui",
+    "crates/fawi-server",
+    "crates/fawi-cli",
+    "crates/fawi-search",
 ]
 
 [workspace.package]

@@ -41,9 +41,9 @@ acceptance criteria.
 
 Before opening the pull request, verify with:
 
-    cargo build -p okf-server
-    cargo build -p okf-gui --features ssr
-    cargo test -p okf-core -p okf-storage
+    cargo build -p fawi-server
+    cargo build -p fawi-gui --features ssr
+    cargo test -p fawi-core -p fawi-storage
 
 When the feature ships, set the plan's `state` to `done` and the spec and plan
 `status` to `stable`. See the bundled `okf-dev` skill for the full workflow.

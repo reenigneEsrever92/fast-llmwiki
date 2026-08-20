@@ -31,9 +31,9 @@ that satisfies the acceptance criteria, and add or update tests.
 
 ## 4. Verify
 
-    cargo build -p okf-server
-    cargo build -p okf-gui --features ssr
-    cargo test -p okf-core -p okf-storage
+    cargo build -p fawi-server
+    cargo build -p fawi-gui --features ssr
+    cargo test -p fawi-core -p fawi-storage
 
 ## 5. Update the docs
 

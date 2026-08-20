@@ -1,6 +1,6 @@
 ---
 type: Plan
-title: Add okf-search crate and wire semantic search into the CLI
+title: Add fawi-search crate and wire semantic search into the CLI
 status: stable
 state: done
 priority: medium
@@ -24,10 +24,10 @@ Implements [semantic search](/dev/specs/semantic-search.md).
 
 ## Steps
 
-- [x] Add `crates/okf-search` to the workspace with a reusable `serve(data, bind)` startup function and an `okf-search` binary.
-- [x] Index the whole bundle (title, description, tags, and body) with a local embedding model, reusing `okf-storage` for bundle reads and change events.
-- [x] Expose an HTTP endpoint that returns relevance-ranked concept summaries with a score (new DTO in `okf-core`).
-- [x] Add a `search` subcommand to `okf-cli` and start the service together with the server and GUI in the default (no-subcommand) mode.
+- [x] Add `crates/fawi-search` to the workspace with a reusable `serve(data, bind)` startup function and an `fawi-search` binary.
+- [x] Index the whole bundle (title, description, tags, and body) with a local embedding model, reusing `fawi-storage` for bundle reads and change events.
+- [x] Expose an HTTP endpoint that returns relevance-ranked concept summaries with a score (new DTO in `fawi-core`).
+- [x] Add a `search` subcommand to `fawi-cli` and start the service together with the server and GUI in the default (no-subcommand) mode.
 - [x] Keep the existing lexical `GET /api/search` behavior unchanged.
 - [x] Add tests for ranking, body-only matches, empty queries, and index rebuilds on change.
 

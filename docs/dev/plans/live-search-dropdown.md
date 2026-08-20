@@ -15,6 +15,6 @@ Implements [live search dropdown in the header](/dev/specs/live-search-dropdown.
 - [x] Bind the header search input to the current query on the search page.
 - [x] Remove the in-page search form from the `Search` component.
 - [x] Close the dropdown on Escape and on outside click.
-- [x] Verify `cargo build -p okf-gui --features ssr` (server + WASM client), `cargo build -p okf-server`, and `cargo test -p okf-core -p okf-storage` pass.
+- [x] Verify `cargo build -p fawi-gui --features ssr` (server + WASM client), `cargo build -p fawi-server`, and `cargo test -p fawi-core -p fawi-storage` pass.
 
 Commit: not recorded (changes left uncommitted).

@@ -1,8 +1,8 @@
 # Plans
 
 - [Body search](body-search.md)
-- [Add okf-search crate and wire semantic search into the CLI](semantic-search.md)
-- [Add okf-cli crate to launch server, GUI, or both](okf-cli.md)
+- [Add fawi-search crate and wire semantic search into the CLI](semantic-search.md)
+- [Add fawi-cli crate to launch server, GUI, or both](fawi-cli.md)
 - [Add a persistent sidebar for bundle navigation](sidebar-navigation.md)
 - [Auto-refresh the sidebar and the current page on bundle changes](live-reload.md)
 - [Preserve scroll position on hot reload](preserve-scroll-on-reload.md)

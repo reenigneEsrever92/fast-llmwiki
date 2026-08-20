@@ -1,7 +1,7 @@
 ---
 type: Specification
 title: Semantic search across the bundle
-description: Embed the whole bundle and serve relevance-ranked search from a dedicated okf-search crate launched by the CLI.
+description: Embed the whole bundle and serve relevance-ranked search from a dedicated fawi-search crate launched by the CLI.
 status: stable
 tags: [dev, search]
 owner: human:felix
@@ -18,15 +18,15 @@ semantic similarity.
 
 We want the entire bundle — every concept, including its body — to be
 searchable semantically: matched by meaning rather than exact substring. This
-must be a dedicated `okf-search` crate launched by `okf-cli`, the same way
-`okf-gui` and `okf-server` are launched.
+must be a dedicated `fawi-search` crate launched by `fawi-cli`, the same way
+`fawi-gui` and `fawi-server` are launched.
 
 # Requirements
 
-- A new workspace crate `okf-search` MUST implement semantic search.
+- A new workspace crate `fawi-search` MUST implement semantic search.
 - The crate MUST index the whole bundle: every concept, using its title,
   description, tags, and body.
-- The crate MUST reuse bundle storage and hot-reload from `okf-storage` (no
+- The crate MUST reuse bundle storage and hot-reload from `fawi-storage` (no
   independent directory scanning) and MUST reindex when the bundle changes.
 - The crate MUST compute a vector embedding for each concept and for each query,
   and rank results by embedding similarity in descending order.
@@ -36,10 +36,10 @@ must be a dedicated `okf-search` crate launched by `okf-cli`, the same way
   concept summaries, each with a relevance score.
 - The existing lexical `GET /api/search` endpoint and its behavior MUST be
   preserved unchanged.
-- `okf-cli` MUST gain a `search` subcommand that launches the `okf-search`
+- `fawi-cli` MUST gain a `search` subcommand that launches the `fawi-search`
   service alone, reusing the crate's startup function. It MUST accept `--data`
   and `--bind` flags defaulting to `./docs` and `127.0.0.1:8082`.
-- With no subcommand, `okf-cli` MUST start the server, the GUI, and the semantic
+- With no subcommand, `fawi-cli` MUST start the server, the GUI, and the semantic
   search service together.
 - Startup, logging, and signal handling MUST follow the existing pattern: logic
   reused from the crate, logging initialized once, a bind failure fails with a

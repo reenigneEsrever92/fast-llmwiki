@@ -17,7 +17,7 @@ A recent Rust toolchain. The workspace is defined in the repository root.
 The unified `okf` CLI starts the REST API, web UI, and semantic search together
 in one process, merged onto a single socket:
 
-    cargo run -p okf-cli
+    cargo run -p fawi-cli
 
 Everything is served at <http://127.0.0.1:8080>: the web UI, the REST API under
 `/api/`, and semantic search under `/api/search/semantic`. The web UI queries
@@ -28,22 +28,22 @@ subcommands below.
 
 ## Run the REST API only
 
-    cargo run -p okf-cli -- server
+    cargo run -p fawi-cli -- server
 
-This is equivalent to the standalone `okf-server` binary:
+This is equivalent to the standalone `fawi-server` binary:
 
-    cargo run -p okf-server -- --data ./docs --bind 127.0.0.1:8080
+    cargo run -p fawi-server -- --data ./docs --bind 127.0.0.1:8080
 
 The API is served at <http://127.0.0.1:8080/api/>. See the
 [REST API](api/rest-api.md) reference for the endpoints.
 
 ## Run the web UI only
 
-    cargo run -p okf-cli -- gui
+    cargo run -p fawi-cli -- gui
 
-This is equivalent to the standalone `okf-gui` binary:
+This is equivalent to the standalone `fawi-gui` binary:
 
-    cargo run -p okf-gui --features ssr -- --api-base-url http://127.0.0.1:8080 --bind 127.0.0.1:8081
+    cargo run -p fawi-gui --features ssr -- --api-base-url http://127.0.0.1:8080 --bind 127.0.0.1:8081
 
 Then open <http://127.0.0.1:8081>.
 
@@ -52,11 +52,11 @@ and in the browser. See [Web UI](gui/leptos-gui.md).
 
 ## Run semantic search only
 
-    cargo run -p okf-cli -- search
+    cargo run -p fawi-cli -- search
 
-This is equivalent to the standalone `okf-search` binary:
+This is equivalent to the standalone `fawi-search` binary:
 
-    cargo run -p okf-search -- --data ./docs --bind 127.0.0.1:8082
+    cargo run -p fawi-search -- --data ./docs --bind 127.0.0.1:8082
 
 The semantic search API is served at <http://127.0.0.1:8082/api/search/semantic>.
 On first run the local embedding model is downloaded from Hugging Face and
@@ -64,19 +64,19 @@ cached.
 
 ## Install the bundled agent skills
 
-    cargo run -p okf-cli -- install
+    cargo run -p fawi-cli -- install
 
 This writes the agent skills embedded in this repository (for example `okf-dev`,
 `okf-init`, `okf-plan`, and `okf-spec`) into `.agents/skills/` in the current
 directory, one `SKILL.md` per skill. Pass `--dir` to install elsewhere:
 
-    cargo run -p okf-cli -- install --dir ~/.agents/skills
+    cargo run -p fawi-cli -- install --dir ~/.agents/skills
 
 See [CLI](server/cli.md) for all flags.
 
 # Examples
 
-    # with `cargo run -p okf-cli` (everything on 8080)
+    # with `cargo run -p fawi-cli` (everything on 8080)
     curl http://127.0.0.1:8080/api/concepts/overview
     curl 'http://127.0.0.1:8080/api/search?q=trust'
     curl 'http://127.0.0.1:8080/api/search/semantic?q=revenue'

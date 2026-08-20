@@ -1,0 +1,20 @@
+[package]
+name = "fawi-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "fawi"
+path = "src/main.rs"
+
+[dependencies]
+fawi-server = { path = "../fawi-server" }
+fawi-gui = { path = "../fawi-gui", features = ["ssr"] }
+fawi-search = { path = "../fawi-search" }
+fawi-storage = { path = "../fawi-storage" }
+anyhow.workspace = true
+axum.workspace = true
+clap.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

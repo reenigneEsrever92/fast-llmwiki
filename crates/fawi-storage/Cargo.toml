@@ -1,0 +1,12 @@
+[package]
+name = "fawi-storage"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+notify.workspace = true
+fawi-core = { path = "../fawi-core" }
+tokio.workspace = true
+tracing.workspace = true

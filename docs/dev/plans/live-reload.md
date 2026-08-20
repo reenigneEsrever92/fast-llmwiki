@@ -23,6 +23,6 @@ Implements [live reload](/dev/specs/live-reload.md).
       message now also carries the affected `paths` array so a root watcher can
       decide which page to reload).
 - [x] Verify no re-fetch is triggered for unrelated changes.
-- [x] Verify `cargo build -p okf-server`, `cargo build -p okf-gui --features ssr`,
-      `cargo check -p okf-gui --features hydrate --target wasm32-unknown-unknown`,
-      and `cargo test -p okf-core -p okf-storage` pass.
+- [x] Verify `cargo build -p fawi-server`, `cargo build -p fawi-gui --features ssr`,
+      `cargo check -p fawi-gui --features hydrate --target wasm32-unknown-unknown`,
+      and `cargo test -p fawi-core -p fawi-storage` pass.

@@ -979,6 +979,109 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
+name = "fawi-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "clap",
+ "fawi-gui",
+ "fawi-search",
+ "fawi-server",
+ "fawi-storage",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "fawi-core"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "comrak",
+ "regex",
+ "serde",
+ "serde_yaml",
+]
+
+[[package]]
+name = "fawi-gui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "clap",
+ "console_error_panic_hook",
+ "fawi-core",
+ "futures",
+ "gloo-net",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
+ "reqwest",
+ "send_wrapper",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "fawi-search"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "clap",
+ "fastembed",
+ "fawi-core",
+ "fawi-storage",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "fawi-server"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "chrono",
+ "clap",
+ "fawi-core",
+ "fawi-storage",
+ "futures",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "fawi-storage"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "fawi-core",
+ "notify",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "filetime"
 version = "0.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2278,109 +2381,6 @@ checksum = "ed0423ff9973dea4d6bd075934fdda86ebb8c05bdf9d6b0507067d4a1226371d"
 dependencies = [
  "serde",
  "thiserror 2.0.20",
-]
-
-[[package]]
-name = "okf-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "clap",
- "okf-gui",
- "okf-search",
- "okf-server",
- "okf-storage",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "okf-core"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "comrak",
- "regex",
- "serde",
- "serde_yaml",
-]
-
-[[package]]
-name = "okf-gui"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "clap",
- "console_error_panic_hook",
- "futures",
- "gloo-net",
- "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "okf-core",
- "reqwest",
- "send_wrapper",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "okf-search"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "chrono",
- "clap",
- "fastembed",
- "okf-core",
- "okf-storage",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "okf-server"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "chrono",
- "clap",
- "futures",
- "okf-core",
- "okf-storage",
- "serde",
- "serde_json",
- "tokio",
- "tokio-tungstenite",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "okf-storage"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "notify",
- "okf-core",
- "tokio",
- "tracing",
 ]
 
 [[package]]

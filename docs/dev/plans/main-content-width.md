@@ -10,7 +10,7 @@ verified: { by: ai:zed, at: 2026-08-19T09:33:13Z }
 
 Implements [main content width](/dev/specs/main-content-width.md).
 
-- [x] Change the `.content` rule in `crates/okf-gui/src/app.rs` so it grows to
+- [x] Change the `.content` rule in `crates/fawi-gui/src/app.rs` so it grows to
       fill the available space as a flex item instead of sizing to its contents,
       while keeping the `56rem` maximum, a `min-width: 0` so it can shrink on
       narrow viewports, and `margin: 0 auto` so it stays centered.

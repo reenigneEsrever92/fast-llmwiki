@@ -17,10 +17,10 @@ Implements [client-side navigation](/dev/specs/client-side-navigation.md).
 - [x] Embed the client bundle with `include_bytes!` (`assets.rs`).
 - [x] Serve `/pkg/okf.js` and `/pkg/okf_bg.wasm` from memory in `ssr.rs`.
 - [x] Combine the API, semantic-search, and GUI routers onto a single socket in
-      `okf-cli` so the client's relative `/api` requests resolve on one origin.
+      `fawi-cli` so the client's relative `/api` requests resolve on one origin.
 - [x] Fix the client fetch to use an absolute URL (`window.location().origin()`)
       instead of a relative path, since `reqwest` on WASM cannot resolve relative
       URLs and returned `NotFound` without making a request.
-- [x] Verify `cargo build --bin okf`, `cargo build -p okf-gui --features ssr`,
-      and `cargo test -p okf-cli -p okf-core -p okf-storage` pass, and that the
+- [x] Verify `cargo build --bin okf`, `cargo build -p fawi-gui --features ssr`,
+      and `cargo test -p fawi-cli -p fawi-core -p fawi-storage` pass, and that the
       single socket serves the page, API, and embedded bundle.

@@ -39,8 +39,8 @@ one socket, so the web UI and its API share an origin.
 
 ## Standalone binaries
 
-The `okf-server`, `okf-gui`, and `okf-search` binaries remain available and
+The `fawi-server`, `fawi-gui`, and `fawi-search` binaries remain available and
 accept the same flags as their `okf` subcommands. The web UI binary must be
 built with the `ssr` feature:
 
-    cargo run -p okf-gui --features ssr -- --api-base-url http://127.0.0.1:8080 --bind 127.0.0.1:8081
+    cargo run -p fawi-gui --features ssr -- --api-base-url http://127.0.0.1:8080 --bind 127.0.0.1:8081

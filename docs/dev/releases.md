@@ -10,7 +10,7 @@ status: stable
 
 Release binaries are built and published automatically by GitHub Actions. There
 is no cross-compilation: each platform is built on its own native runner, which
-is required because `okf-search` links native ONNX Runtime binaries and the
+is required because `fawi-search` links native ONNX Runtime binaries and the
 `okf` server binary embeds a `wasm32-unknown-unknown` client bundle.
 
 ## Cutting a release
@@ -45,10 +45,10 @@ that platform and architecture must be identifiable from the filename alone.
 
 A release-equivalent build on any platform is:
 
-    cargo build --release -p okf-cli
+    cargo build --release -p fawi-cli
 
 This produces the `okf` binary (`okf.exe` on Windows) in `target/release/`.
-Because `okf-cli` depends on `okf-gui` with the `ssr` feature, the build also
+Because `fawi-cli` depends on `fawi-gui` with the `ssr` feature, the build also
 compiles the `wasm32-unknown-unknown` client bundle, so it requires:
 
     rustup target add wasm32-unknown-unknown

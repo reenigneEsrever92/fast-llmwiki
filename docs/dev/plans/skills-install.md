@@ -10,7 +10,7 @@ verified: { by: ai:zed, at: 2026-08-19T09:59:34Z }
 
 Implements [install bundled agent skills](/dev/specs/skills-install.md).
 
-- [x] Add a compile-time `include_skills!` macro to `okf-cli` that embeds every
+- [x] Add a compile-time `include_skills!` macro to `fawi-cli` that embeds every
   skill under `.agents/skills/` into the binary with `include_str!`.
 - [x] Add an `install` subcommand to the `okf` CLI with a `--dir` flag that
   defaults to `.agents/skills`.

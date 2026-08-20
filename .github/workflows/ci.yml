@@ -21,14 +21,14 @@ jobs:
           targets: wasm32-unknown-unknown
 
       # The version must match the `wasm-bindgen` crate pinned in `Cargo.lock`;
-      # `okf-gui`'s `build.rs` fails with a clear message when it drifts.
+      # `fawi-gui`'s `build.rs` fails with a clear message when it drifts.
       - name: Install wasm-bindgen-cli
         run: cargo install wasm-bindgen-cli --version 0.2.127
 
-      # `okf-cli` depends on `okf-gui` with the `ssr` feature, so this builds
+      # `fawi-cli` depends on `fawi-gui` with the `ssr` feature, so this builds
       # the client (wasm32) bundle and embeds it in the server binary.
       - name: Build workspace (ssr)
-        run: cargo build --workspace --features okf-gui/ssr
+        run: cargo build --workspace --features fawi-gui/ssr
 
       - name: Run unit tests
         run: cargo test --workspace
