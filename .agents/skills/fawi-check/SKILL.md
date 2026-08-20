@@ -20,7 +20,7 @@ sitting for a while. Start with `state: planned` and `state: proposed` items.
 For each request:
 
 - Is the problem still real? Has the code changed to make it obsolete?
-- Is the `# Feasibility` still accurate?
+- Is the `# Decisions` still accurate?
 - Does the `# Implementation plan` still match the current crate layout, APIs,
   and dependencies? Would the steps still work?
 

@@ -13,7 +13,7 @@ inside it.
 
     grep -rl "^state: proposed" docs/dev/backlog
 
-Read the request's `# Problem`, `# Proposal`, and `# Feasibility` sections.
+Read the request's `# Problem`, `# Proposal`, and `# Decisions` sections.
 
 ## 2. Write the approach
 

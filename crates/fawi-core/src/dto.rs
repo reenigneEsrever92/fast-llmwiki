@@ -1,9 +1,12 @@
 //! Serialization DTOs shared between the REST API and the frontend.
 
+use std::collections::BTreeMap;
+
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use crate::concept::{Concept, ConceptSummary, Generated, Source, Status, TrustTier, Verification};
+use crate::front_matter;
 use crate::render::render_markdown;
 
 /// A concept, with derived trust/staleness and its body rendered to HTML.
@@ -19,6 +22,7 @@ pub struct ConceptResponse {
     pub trust_tier: TrustTier,
     pub stale: bool,
     pub stale_after: Option<NaiveDate>,
+    pub extra_fields: BTreeMap<String, String>,
     pub generated: Option<Generated>,
     pub verified: Vec<Verification>,
     pub sources: Vec<Source>,
@@ -38,6 +42,7 @@ impl ConceptResponse {
             trust_tier: concept.trust_tier(),
             stale: concept.is_stale(today),
             stale_after: concept.stale_after,
+            extra_fields: front_matter::extra_fields(&concept.front_matter),
             generated: concept.generated.clone(),
             verified: concept.verified.clone(),
             sources: concept.sources.clone(),
@@ -58,6 +63,7 @@ pub struct ConceptSummaryResponse {
     pub trust_tier: TrustTier,
     pub stale: bool,
     pub stale_after: Option<NaiveDate>,
+    pub extra_fields: BTreeMap<String, String>,
 }
 
 impl ConceptSummaryResponse {
@@ -72,6 +78,7 @@ impl ConceptSummaryResponse {
             trust_tier: summary.trust_tier,
             stale: summary.stale_after.map(|d| today >= d).unwrap_or(false),
             stale_after: summary.stale_after,
+            extra_fields: summary.extra_fields.clone(),
         }
     }
 }
@@ -106,6 +113,7 @@ pub struct DirListingResponse {
     pub log_html: Option<String>,
     pub concepts: Vec<ConceptSummaryResponse>,
     pub subdirs: Vec<String>,
+    pub fields: Vec<String>,
 }
 
 /// A recursive directory tree node returned by `GET /api/tree`.

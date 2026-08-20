@@ -1,3 +1,7 @@
+use fawi_core::concept::TrustTier;
+use fawi_core::dto::{
+    ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
+};
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use leptos_meta::*;
@@ -6,12 +10,8 @@ use leptos_router::{
     hooks::{use_location, use_navigate, use_params_map, use_query_map},
     NavigateOptions, SsrMode, StaticSegment, WildcardSegment,
 };
-use fawi_core::concept::TrustTier;
-use fawi_core::dto::{
-    ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
-};
 
-use crate::api_client::{fetch_page, fetch_search, fetch_tree, PageData};
+use crate::api_client::{fetch_dir, fetch_page, fetch_search, fetch_tree, PageData};
 
 const STYLE: &str = r#"
 :root { --bg:#fff; --fg:#1a1a1a; --muted:#6b7280; --border:#e5e7eb; --accent:#2563eb; --danger:#dc2626; --warn:#b45309; --green:#15803d; }
@@ -28,6 +28,11 @@ body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-seri
 .search-dropdown a:hover { background:#f3f4f6; }
 .search-dropdown .title { font-weight:600; font-size:0.9rem; }
 .search-dropdown .desc { color:var(--muted); font-size:0.82rem; margin-top:0.1rem; }
+.sort-controls { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin:0.75rem 0; }
+.sort-controls .label { font-size:0.85rem; color:var(--muted); }
+.sort-button { padding:0.3rem 0.6rem; border:1px solid var(--border); border-radius:6px; text-decoration:none; color:var(--fg); font-size:0.85rem; }
+.sort-button:hover { border-color:var(--accent); }
+.sort-button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 .content { flex:1 1 0%; min-width:0; max-width:56rem; margin:0 auto; padding:1.5rem 1.25rem 4rem; }
 .muted { color:var(--muted); font-size:0.85rem; }
 .badge { display:inline-block; padding:0.1rem 0.5rem; border-radius:9999px; font-size:0.72rem; font-weight:600; }
@@ -40,6 +45,7 @@ body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-seri
 .badge.trust-unverified { background:#f3f4f6; color:var(--muted); }
 .badge.stale { background:#fef2f2; color:var(--danger); }
 .badge.tag { background:#f3f4f6; color:var(--muted); font-weight:500; }
+.badge.field { background:#f3f4f6; color:var(--muted); font-weight:600; }
 .page-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:0.5rem; margin-bottom:0.5rem; }
 .page-head h1 { margin:0; font-size:1.6rem; }
 .meta { display:flex; flex-wrap:wrap; gap:0.4rem; margin:0.75rem 0; }
@@ -52,6 +58,7 @@ body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-seri
 .concept-list .desc { color:var(--muted); font-size:0.9rem; margin-top:0.15rem; }
 .page-body { overflow-wrap:break-word; }
 .page-body pre { background:#f6f8fa; padding:1rem; border-radius:6px; overflow-x:auto; }
+.page-body .mermaid { margin:1rem 0; max-width:100%; overflow-x:auto; }
 .page-body code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
 .page-body table { border-collapse:collapse; margin:1rem 0; }
 .page-body th, .page-body td { border:1px solid var(--border); padding:0.4rem 0.6rem; }
@@ -418,13 +425,27 @@ fn ConceptLeaf(summary: ConceptSummaryResponse, pathname: Memo<String>) -> impl 
 #[component]
 fn Page() -> impl IntoView {
     let params = use_params_map();
+    let query = use_query_map();
     let page_reload = use_context::<PageReload>()
         .expect("page reload signal not provided")
         .0;
-    let id = move || params.get().get("rest").unwrap_or_default();
     let data = Resource::new(
-        move || (id(), page_reload.get()),
-        move |(id, _)| crate::api_client::to_send_future(async move { fetch_page(&id).await }),
+        move || {
+            let q = query.get();
+            let id = params.get().get("rest").unwrap_or_default();
+            let sort = q.get("sort");
+            let dir = q.get("dir");
+            (id, page_reload.get(), sort, dir)
+        },
+        move |(id, _, sort, dir)| {
+            crate::api_client::to_send_future(async move {
+                if sort.is_some() {
+                    fetch_dir(&id, sort.as_deref(), dir.as_deref()).await
+                } else {
+                    fetch_page(&id).await
+                }
+            })
+        },
     );
 
     // Preserve the window scroll offset across an in-place hot reload of the
@@ -520,6 +541,7 @@ fn ConceptListItem(summary: ConceptSummaryResponse) -> impl IntoView {
     let stale = summary.stale;
     let description = summary.description;
     let tags = summary.tags;
+    let extra_fields = summary.extra_fields;
 
     view! {
         <li>
@@ -540,6 +562,13 @@ fn ConceptListItem(summary: ConceptSummaryResponse) -> impl IntoView {
                     </div>
                 }.into_any()
             } else { ().into_any() }}
+            {if !extra_fields.is_empty() {
+                view! {
+                    <div class="meta">
+                        {extra_fields.into_iter().map(|(k, v)| view! { <span class="badge field">{format!("{}: {}", k, v)}</span> }).collect::<Vec<_>>()}
+                    </div>
+                }.into_any()
+            } else { ().into_any() }}
         </li>
     }
 }
@@ -554,6 +583,7 @@ fn ConceptView(concept: ConceptResponse) -> impl IntoView {
     let trust_class_name = format!("badge {}", trust_class(concept.trust_tier));
     let stale = concept.stale;
     let tags = concept.tags;
+    let extra_fields = concept.extra_fields;
     let description = concept.description;
     let resource = concept.resource;
     let stale_after = concept
@@ -639,6 +669,10 @@ fn ConceptView(concept: ConceptResponse) -> impl IntoView {
                 view! { <div class="meta">{tags.into_iter().map(|t| view! { <span class="badge tag">{t}</span> }).collect::<Vec<_>>()}</div> }.into_any()
             } else { ().into_any() }}
 
+            {if !extra_fields.is_empty() {
+                view! { <div class="meta">{extra_fields.into_iter().map(|(k, v)| view! { <span class="badge field">{format!("{}: {}", k, v)}</span> }).collect::<Vec<_>>()}</div> }.into_any()
+            } else { ().into_any() }}
+
             {if let Some(desc) = description { view! { <p>{desc}</p> }.into_any() } else { ().into_any() }}
             {if let Some(res) = resource { view! { <p class="muted">"Resource: " <a href=res.clone()>{res.clone()}</a></p> }.into_any() } else { ().into_any() }}
 
@@ -670,6 +704,22 @@ fn DirView(dir: DirListingResponse) -> impl IntoView {
     let log_html = dir.log_html;
     let subdirs = dir.subdirs;
     let concepts = dir.concepts;
+    let fields = dir.fields;
+
+    let query_map = use_query_map();
+    let current_sort = query_map.get_untracked().get("sort").unwrap_or_default();
+    let is_desc = query_map
+        .get_untracked()
+        .get("dir")
+        .unwrap_or_default()
+        .trim()
+        .eq_ignore_ascii_case("desc");
+
+    let base = if path.is_empty() {
+        "/".to_string()
+    } else {
+        format!("/{path}")
+    };
 
     view! {
         <div>
@@ -682,6 +732,31 @@ fn DirView(dir: DirListingResponse) -> impl IntoView {
                     }
                 }).collect::<Vec<_>>()}
             </nav>
+
+            <div class="sort-controls">
+                <span class="label">"Sort:"</span>
+                {fields.clone().into_iter().map(|field| {
+                    let active = current_sort == field;
+                    let sort_href = if !active {
+                        format!("{base}?sort={}&dir=asc", crate::api_client::urlencode(&field))
+                    } else if is_desc {
+                        base.clone()
+                    } else {
+                        format!("{base}?sort={}&dir=desc", crate::api_client::urlencode(&field))
+                    };
+                    let label = if !active {
+                        field.clone()
+                    } else if is_desc {
+                        format!("{field} ↓")
+                    } else {
+                        format!("{field} ↑")
+                    };
+                    let class = if active { "sort-button active" } else { "sort-button" };
+                    view! {
+                        <a class=class href=sort_href>{label}</a>
+                    }
+                }).collect::<Vec<_>>()}
+            </div>
 
             {if let Some(html) = index_html {
                 view! { <div class="page-body" inner_html=html></div> }.into_any()

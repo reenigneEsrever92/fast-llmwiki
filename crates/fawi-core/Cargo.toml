@@ -6,6 +6,10 @@ edition.workspace = true
 [dependencies]
 chrono.workspace = true
 comrak.workspace = true
+merman = { version = "0.7", features = ["render"], optional = true }
 regex.workspace = true
 serde.workspace = true
 serde_yaml.workspace = true
+
+[features]
+mermaid = ["dep:merman"]

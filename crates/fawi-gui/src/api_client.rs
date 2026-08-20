@@ -77,6 +77,43 @@ pub async fn fetch_page(path: &str) -> PageData {
     PageData::NotFound
 }
 
+/// Fetch a directory listing with optional `sort` and `dir` (`asc`/`desc`)
+/// query parameters. Returns `NotFound` when there is no directory at `path`.
+pub async fn fetch_dir(path: &str, sort: Option<&str>, dir: Option<&str>) -> PageData {
+    let path = path.trim_matches('/');
+    let dir_path = if path.is_empty() {
+        "dirs".to_string()
+    } else {
+        format!("dirs/{path}")
+    };
+
+    let mut params: Vec<String> = Vec::new();
+    if let Some(s) = sort.map(str::trim).filter(|s| !s.is_empty()) {
+        params.push(format!("sort={}", urlencode(s)));
+        let desc = dir
+            .map(str::trim)
+            .map(str::to_ascii_lowercase)
+            .map(|d| d == "desc" || d == "descending")
+            .unwrap_or(false);
+        params.push(if desc {
+            "dir=desc".to_string()
+        } else {
+            "dir=asc".to_string()
+        });
+    }
+
+    let url = if params.is_empty() {
+        dir_path
+    } else {
+        format!("{dir_path}?{}", params.join("&"))
+    };
+
+    match get_json::<DirListingResponse>(&url).await {
+        Ok(dir) => PageData::Dir(dir),
+        Err(_) => PageData::NotFound,
+    }
+}
+
 pub async fn fetch_search(query: &str) -> Vec<ConceptSummaryResponse> {
     let path = format!("search?q={}", urlencode(query));
     get_json::<Vec<ConceptSummaryResponse>>(&path)

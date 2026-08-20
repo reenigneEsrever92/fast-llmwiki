@@ -2,10 +2,11 @@
 type: ChangeRequest
 title: Sort and filter by front matter fields
 description: Order and narrow directory listings by any front matter field.
-state: planned
+state: done
 priority: medium
 tags: [dev, gui]
 owner: human:felix
+verified: { by: human:felix, at: 2026-08-20T19:21:46Z }
 ---
 
 # Problem
@@ -34,7 +35,7 @@ ANDed; a list-valued field matches when any element matches). Values that cannot
 be compared (e.g. nested maps) or keys that are absent are handled stably rather
 than erroring.
 
-# Feasibility
+# Decisions
 
 - The sort/filter logic lands in `fawi-storage`, where `FsBundle::list_dir`
   already produces a sorted `Vec<ConceptSummary>`. The `BundleSource` trait and
@@ -118,3 +119,6 @@ whatever the server returns.
   `/api/dirs` and add controls to `DirView` that update the URL.
 - [ ] Document the new parameters in `docs/api/rest-api.md` and update
   `docs/frontmatter.md` if needed.
+
+Implemented and verified (builds and tests pass); recorded in the
+[changelog](../changelog.md) for 2026-08-20.

@@ -13,8 +13,8 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
 [backlog](backlog/), is planned, implemented, and finally recorded in the
 [changelog](changelog.md):
 
-1. **Propose** — validate the change against the codebase and add it to the
-   backlog with the `fawi-propose` skill.
+1. **Propose** — inspect the codebase, settle open questions with the
+   requestor, and add it to the backlog with the `fawi-propose` skill.
 2. **Plan** — append an implementation plan and set `state: planned` with the
    `fawi-plan` skill.
 3. **Implement** — follow the plan, run the build and tests, mark it `state: done`,

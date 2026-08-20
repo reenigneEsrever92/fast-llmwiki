@@ -13,9 +13,10 @@ Development is change-driven. A change to this repository starts as a
 
 ## Workflow
 
-1. **Propose** — validate the change against the codebase and add a change
-   request to the [backlog](dev/backlog/) describing the problem, proposal,
-   feasibility, and acceptance criteria. See the bundled `fawi-propose` skill.
+1. **Propose** — inspect the codebase, settle any open questions with the
+   requestor, and add a change request to the [backlog](dev/backlog/) describing
+   the problem, proposal, key decisions, and acceptance criteria. See the
+   bundled `fawi-propose` skill.
 2. **Plan** — append an implementation plan (technical approach and an ordered
    step checklist) to the request and set its `state` to `planned`. See
    `fawi-plan`.
@@ -33,7 +34,8 @@ shown in the [Development](dev/index.md) conventions and these sections:
 
 - `# Problem` — the motivation or gap.
 - `# Proposal` — the change in one or two paragraphs.
-- `# Feasibility` — where the change lands and its risks, found by reading the code.
+- `# Decisions` — the key decisions and where the change lands, agreed with the
+  requestor while proposing.
 - `# Acceptance criteria` — testable, concrete outcomes.
 - `# Implementation plan` — added later by `fawi-plan` (approach and steps).
 

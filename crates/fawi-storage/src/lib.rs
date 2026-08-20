@@ -7,6 +7,25 @@ use fawi_core::{Concept, ConceptSummary};
 
 pub use fs_bundle::{ChangeEvent, FsBundle};
 
+/// Direction to apply when sorting a directory listing.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum SortDirection {
+    /// Ascending (natural) order.
+    #[default]
+    Ascending,
+    /// Descending (reversed) order.
+    Descending,
+}
+
+/// Sort options applied to a directory listing.
+#[derive(Debug, Clone, Default)]
+pub struct ListOptions {
+    /// Front matter key to sort by (`None` falls back to title order).
+    pub sort: Option<String>,
+    /// Direction to sort in; ignored when `sort` is `None`.
+    pub direction: SortDirection,
+}
+
 /// A directory listing for the bundle browser.
 #[derive(Debug, Clone, Default)]
 pub struct DirListing {
@@ -18,6 +37,8 @@ pub struct DirListing {
     pub log_markdown: Option<String>,
     pub concepts: Vec<ConceptSummary>,
     pub subdirs: Vec<String>,
+    /// Distinct front matter keys across this directory's concepts, for pickers.
+    pub fields: Vec<String>,
 }
 
 /// A single node in the bundle directory tree.
@@ -37,7 +58,7 @@ pub struct TreeNode {
 #[async_trait]
 pub trait BundleSource: Send + Sync {
     async fn concept(&self, id: &str) -> Option<Concept>;
-    async fn list_dir(&self, dir: &str) -> Option<DirListing>;
+    async fn list_dir(&self, dir: &str, options: &ListOptions) -> Option<DirListing>;
     async fn search(&self, query: &str) -> Vec<ConceptSummary>;
     /// The full directory tree from the root down, for the navigation sidebar.
     async fn tree(&self) -> TreeNode;

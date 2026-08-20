@@ -11,12 +11,14 @@ use axum::{
     Json, Router,
 };
 use chrono::NaiveDate;
-use futures::{SinkExt, StreamExt};
 use fawi_core::dto::{
     ConceptResponse, ConceptSummaryResponse, DirListingResponse, TreeNodeResponse,
 };
 use fawi_core::render_markdown;
-use fawi_storage::{BundleSource, ChangeEvent, DirListing, FsBundle, TreeNode};
+use fawi_storage::{
+    BundleSource, ChangeEvent, DirListing, FsBundle, ListOptions, SortDirection, TreeNode,
+};
+use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 
 static BUNDLE: OnceLock<Arc<FsBundle>> = OnceLock::new();
@@ -49,6 +51,19 @@ struct SearchQuery {
     q: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+struct DirQuery {
+    sort: Option<String>,
+    dir: Option<String>,
+}
+
+fn parse_direction(raw: Option<&str>) -> SortDirection {
+    match raw.map(str::trim).map(str::to_ascii_lowercase).as_deref() {
+        Some("desc") | Some("descending") => SortDirection::Descending,
+        _ => SortDirection::Ascending,
+    }
+}
+
 async fn get_concept(Path(id): Path<String>) -> Response {
     match bundle().concept(&id).await {
         Some(concept) => Json(ConceptResponse::from_concept(&concept, today())).into_response(),
@@ -56,16 +71,24 @@ async fn get_concept(Path(id): Path<String>) -> Response {
     }
 }
 
-async fn get_dir(Path(path): Path<String>) -> Response {
+async fn get_dir(Path(path): Path<String>, Query(query): Query<DirQuery>) -> Response {
     let path = path.trim_end_matches('/').to_string();
-    match bundle().list_dir(&path).await {
+    let options = ListOptions {
+        sort: query.sort,
+        direction: parse_direction(query.dir.as_deref()),
+    };
+    match bundle().list_dir(&path, &options).await {
         Some(listing) => Json(dir_response(listing)).into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
     }
 }
 
-async fn get_dir_root() -> Response {
-    match bundle().list_dir("").await {
+async fn get_dir_root(Query(query): Query<DirQuery>) -> Response {
+    let options = ListOptions {
+        sort: query.sort,
+        direction: parse_direction(query.dir.as_deref()),
+    };
+    match bundle().list_dir("", &options).await {
         Some(listing) => Json(dir_response(listing)).into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
     }
@@ -94,6 +117,7 @@ fn dir_response(listing: DirListing) -> DirListingResponse {
         log_html,
         concepts,
         subdirs: listing.subdirs,
+        fields: listing.fields,
     }
 }
 

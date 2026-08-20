@@ -19,7 +19,7 @@ Extend the bundle keyword search so a query also matches the rendered concept
 body, keeping the existing title/slug/type/tag matching and the title-sorted
 result order.
 
-# Feasibility
+# Decisions
 
 - The change lives entirely in `fawi-core`'s `FsBundle::search` (or the storage
   crate's search path), where title/slug/type/tag matching already happens.

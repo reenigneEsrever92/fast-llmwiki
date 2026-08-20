@@ -1,14 +1,16 @@
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use notify::{RecursiveMode, Watcher};
+use fawi_core::front_matter::{compare_values, get_field, keys};
 use fawi_core::{Concept, ConceptSummary};
+use notify::{RecursiveMode, Watcher};
 use tokio::sync::{broadcast, mpsc, RwLock};
 
-use crate::{BundleSource, DirListing, TreeNode};
+use crate::{BundleSource, DirListing, ListOptions, SortDirection, TreeNode};
 
 /// A filesystem change, expressed as the affected concept IDs and directory
 /// paths (relative to the bundle root; `""` is the root).
@@ -258,6 +260,22 @@ fn parent_of(id: &str) -> &str {
     }
 }
 
+
+fn compare_field(a: &Concept, b: &Concept, field: Option<&str>) -> Ordering {
+    let Some(field) = field else {
+        return Ordering::Equal;
+    };
+    match (
+        get_field(&a.front_matter, field),
+        get_field(&b.front_matter, field),
+    ) {
+        (Some(x), Some(y)) => compare_values(x, y),
+        (Some(_), None) => Ordering::Less,
+        (None, Some(_)) => Ordering::Greater,
+        (None, None) => Ordering::Equal,
+    }
+}
+
 /// Recursively build a tree node for `dir` from the scanned bundle index.
 fn build_tree(dir: &str, dirs: &HashSet<String>, concepts: &HashMap<String, Concept>) -> TreeNode {
     let mut node_concepts: Vec<ConceptSummary> = concepts
@@ -306,7 +324,7 @@ impl BundleSource for FsBundle {
         self.concepts.read().await.get(id).cloned()
     }
 
-    async fn list_dir(&self, dir: &str) -> Option<DirListing> {
+    async fn list_dir(&self, dir: &str, options: &ListOptions) -> Option<DirListing> {
         let dir = dir.trim_matches('/');
         if !self.dirs.read().await.contains(dir) {
             return None;
@@ -315,12 +333,32 @@ impl BundleSource for FsBundle {
         let concepts = self.concepts.read().await;
         let dirs = self.dirs.read().await;
 
-        let mut concept_summaries: Vec<ConceptSummary> = concepts
+        let fields: Vec<String> = concepts
             .iter()
             .filter(|(id, _)| parent_of(id) == dir)
-            .map(|(_, c)| c.summary())
+            .flat_map(|(_, c)| keys(&c.front_matter))
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
             .collect();
-        concept_summaries.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
+
+        let mut matched: Vec<Concept> = concepts
+            .iter()
+            .filter(|(id, _)| parent_of(id) == dir)
+            .map(|(_, c)| c.clone())
+            .collect();
+        let field = options.sort.as_deref();
+        let descending = matches!(options.direction, SortDirection::Descending);
+        matched.sort_by(|a, b| {
+            let order = compare_field(a, b, field)
+                .then_with(|| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
+            if field.is_some() && descending {
+                order.reverse()
+            } else {
+                order
+            }
+        });
+
+        let concept_summaries: Vec<ConceptSummary> = matched.iter().map(|c| c.summary()).collect();
 
         let mut subdirs: Vec<String> = dirs
             .iter()
@@ -335,6 +373,7 @@ impl BundleSource for FsBundle {
             log_markdown: read_reserved(&self.root, dir, "log.md").await,
             concepts: concept_summaries,
             subdirs,
+            fields,
         })
     }
 
@@ -454,6 +493,60 @@ mod tests {
         let expected = std::fs::canonicalize(base.join("docs")).unwrap();
         assert_eq!(bundle.root, expected);
         assert!(bundle.root.is_absolute());
+
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[tokio::test]
+    async fn list_dir_sorts_ascending_and_descending() {
+        let base = std::env::temp_dir().join(format!("okf-list-sort-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        std::fs::create_dir_all(&base).unwrap();
+        std::fs::write(
+            base.join("a.md"),
+            "---\ntype: Metric\npriority: 2\n---\nbody\n",
+        )
+        .unwrap();
+        std::fs::write(
+            base.join("b.md"),
+            "---\ntype: Reference\npriority: 1\n---\nbody\n",
+        )
+        .unwrap();
+        std::fs::write(
+            base.join("c.md"),
+            "---\ntype: Metric\npriority: 3\n---\nbody\n",
+        )
+        .unwrap();
+
+        let bundle = FsBundle::open(&base).await.unwrap();
+
+        // Sort by the numeric `priority` field ascending.
+        let opts = ListOptions {
+            sort: Some("priority".to_string()),
+            direction: SortDirection::Ascending,
+        };
+        let listing = bundle.list_dir("", &opts).await.unwrap();
+        let ids: Vec<&str> = listing.concepts.iter().map(|c| c.id.as_str()).collect();
+        assert_eq!(ids, vec!["b", "a", "c"]);
+        assert_eq!(listing.fields, vec!["priority".to_string(), "type".to_string()]);
+
+        // Descending reverses the full order.
+        let opts = ListOptions {
+            sort: Some("priority".to_string()),
+            direction: SortDirection::Descending,
+        };
+        let listing = bundle.list_dir("", &opts).await.unwrap();
+        let ids: Vec<&str> = listing.concepts.iter().map(|c| c.id.as_str()).collect();
+        assert_eq!(ids, vec!["c", "a", "b"]);
+
+        // With no sort, the direction is ignored and title order (a, b, c) applies.
+        let opts = ListOptions {
+            sort: None,
+            direction: SortDirection::Descending,
+        };
+        let listing = bundle.list_dir("", &opts).await.unwrap();
+        let ids: Vec<&str> = listing.concepts.iter().map(|c| c.id.as_str()).collect();
+        assert_eq!(ids, vec!["a", "b", "c"]);
 
         let _ = std::fs::remove_dir_all(&base);
     }

@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_yaml::Value;
@@ -83,12 +85,18 @@ pub struct Concept {
     pub sources: Vec<Source>,
     /// The markdown body (without front matter).
     pub content: String,
+    /// The full front matter mapping, preserving unknown producer/bundle fields.
+    pub front_matter: Value,
 }
 
 impl Concept {
     pub fn from_markdown(id: &str, markdown: &str) -> Self {
         let (yaml, body) = split_front_matter(markdown);
-        let meta = yaml.as_deref().and_then(parse_meta).unwrap_or_default();
+        let value = yaml
+            .as_deref()
+            .and_then(|s| serde_yaml::from_str::<Value>(s).ok())
+            .unwrap_or(Value::Null);
+        let meta = parse_meta(&value).unwrap_or_default();
         let title = meta
             .title
             .filter(|t| !t.trim().is_empty())
@@ -107,6 +115,7 @@ impl Concept {
             stale_after: meta.stale_after,
             sources: meta.sources,
             content: body,
+            front_matter: value,
         }
     }
 
@@ -144,6 +153,7 @@ impl Concept {
             status: self.status,
             trust_tier: self.trust_tier(),
             stale_after: self.stale_after,
+            extra_fields: crate::front_matter::extra_fields(&self.front_matter),
         }
     }
 }
@@ -159,6 +169,7 @@ pub struct ConceptSummary {
     pub status: Status,
     pub trust_tier: TrustTier,
     pub stale_after: Option<NaiveDate>,
+    pub extra_fields: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Default)]
@@ -175,8 +186,7 @@ struct Meta {
     sources: Vec<Source>,
 }
 
-fn parse_meta(yaml: &str) -> Option<Meta> {
-    let value: Value = serde_yaml::from_str(yaml).ok()?;
+fn parse_meta(value: &Value) -> Option<Meta> {
     let map = value.as_mapping()?;
 
     let mut meta = Meta::default();
@@ -264,7 +274,9 @@ fn parse_generated(m: &serde_yaml::Mapping) -> Generated {
 }
 
 fn parse_verified(v: Option<&Value>) -> Vec<Verification> {
-    let Some(v) = v else { return Vec::new(); };
+    let Some(v) = v else {
+        return Vec::new();
+    };
 
     if let Some(m) = v.as_mapping() {
         return vec![parse_verification(m)];
@@ -287,8 +299,12 @@ fn parse_verification(m: &serde_yaml::Mapping) -> Verification {
 }
 
 fn parse_sources(v: Option<&Value>) -> Vec<Source> {
-    let Some(v) = v else { return Vec::new(); };
-    let Some(seq) = v.as_sequence() else { return Vec::new(); };
+    let Some(v) = v else {
+        return Vec::new();
+    };
+    let Some(seq) = v.as_sequence() else {
+        return Vec::new();
+    };
     seq.iter()
         .filter_map(|item| item.as_mapping())
         .map(parse_source)
@@ -350,10 +366,16 @@ mod tests {
         assert_eq!(c.status, Status::Stable);
         assert_eq!(c.tags, vec!["finance", "revenue"]);
         assert_eq!(c.trust_tier(), TrustTier::HumanReviewed);
-        assert_eq!(c.stale_after, Some(NaiveDate::from_ymd_opt(2026, 12, 31).unwrap()));
+        assert_eq!(
+            c.stale_after,
+            Some(NaiveDate::from_ymd_opt(2026, 12, 31).unwrap())
+        );
         assert_eq!(c.sources.len(), 1);
         assert_eq!(c.sources[0].usage_count, Some(5000));
-        assert_eq!(c.sources[0].last_modified, Some(NaiveDate::from_ymd_opt(2026, 4, 2).unwrap()));
+        assert_eq!(
+            c.sources[0].last_modified,
+            Some(NaiveDate::from_ymd_opt(2026, 4, 2).unwrap())
+        );
         assert_eq!(c.content, "# Body\n");
     }
 
@@ -373,5 +395,37 @@ mod tests {
             "---\ntype: T\nverified: { by: human:a, at: 2026-01-01T00:00:00Z }\n---\nbody\n",
         );
         assert_eq!(human.trust_tier(), TrustTier::HumanReviewed);
+    }
+
+    #[test]
+    fn preserves_unknown_front_matter() {
+        use crate::front_matter::get_field;
+        let c = Concept::from_markdown("x", "---\ntype: Metric\npriority: high\n---\nbody\n");
+        assert_eq!(
+            get_field(&c.front_matter, "priority").and_then(|v| v.as_str()),
+            Some("high")
+        );
+    }
+
+    #[test]
+    fn summary_carries_extra_front_matter_fields() {
+        let c = Concept::from_markdown(
+            "x",
+            "---\ntype: ChangeRequest\nstate: proposed\npriority: high\nowner: human:felix\n---\nbody\n",
+        );
+        let s = c.summary();
+        assert_eq!(
+            s.extra_fields.get("state").map(|v| v.as_str()),
+            Some("proposed")
+        );
+        assert_eq!(
+            s.extra_fields.get("priority").map(|v| v.as_str()),
+            Some("high")
+        );
+        assert_eq!(
+            s.extra_fields.get("owner").map(|v| v.as_str()),
+            Some("human:felix")
+        );
+        assert!(!s.extra_fields.contains_key("type"));
     }
 }

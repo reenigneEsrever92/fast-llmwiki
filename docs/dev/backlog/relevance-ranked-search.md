@@ -20,7 +20,7 @@ type, and tags above matches in the body — and order results by that score bef
 falling back to title order. Leave semantic search's cosine-similarity ranking as
 is.
 
-# Feasibility
+# Decisions
 
 - Keyword search is implemented in the `fawi-core` / storage search path; scoring
   can be added there without new dependencies.

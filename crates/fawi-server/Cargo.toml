@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 fawi-storage = { path = "../fawi-storage" }
-fawi-core = { path = "../fawi-core" }
+fawi-core = { path = "../fawi-core", features = ["mermaid"] }
 anyhow.workspace = true
 axum.workspace = true
 tokio.workspace = true

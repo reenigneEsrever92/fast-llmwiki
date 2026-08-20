@@ -26,9 +26,14 @@ All responses are JSON.
 by cosine similarity using a local embedding model; it is served on the same
 socket when running the merged `okf` binary.
 
+`/api/dirs` also accepts `sort=<field>` and `dir=asc|desc`. `sort` orders the
+listing by any front matter key (falling back to title); `dir` sets the sort
+direction and defaults to `asc` when omitted.
+
 # Examples
 
     curl http://127.0.0.1:8080/api/concepts/overview
     curl 'http://127.0.0.1:8080/api/search?q=trust'
+    curl 'http://127.0.0.1:8080/api/dirs?sort=status&dir=desc'
 
 See [Hot reload](websocket.md) for the WebSocket protocol.
