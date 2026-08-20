@@ -51,8 +51,6 @@ move it to `rejected` or `superseded`.
 - `# Feasibility` — the findings from step 2.
 - `# Acceptance criteria` — testable, concrete outcomes.
 
-Then link the request from `docs/dev/backlog/index.md`.
-
 ## Next steps
 
 `fawi-plan` appends the implementation plan to this request.
