@@ -1,52 +1,53 @@
 ---
 type: Guide
 title: Contributing
-description: How to propose and land a feature through specs, plans, and pull requests.
+description: How to propose, plan, implement, and record a change through the change-driven workflow.
 tags: [dev, contributing]
 status: stable
 ---
 
 # Contributing
 
-Features are spec-driven. A change to this repository starts as a
-`type: Specification` in [specs](dev/specs/) rather than as code.
+Development is change-driven. A change to this repository starts as a
+`type: ChangeRequest` in the [backlog](dev/backlog/) rather than as code.
 
 ## Workflow
 
-1. Write a spec under [specs](dev/specs/) describing the problem, requirements, and
-   acceptance criteria. Open a pull request with the spec.
-2. The pull request may stop at the spec, or it may optionally also add the
-   matching [plan](dev/plans/) and the implementation right away.
-3. Merge the spec first when it needs review on its own. The plan and
-   implementation can follow in a later pull request.
+1. **Propose** — validate the change against the codebase and add a change
+   request to the [backlog](dev/backlog/) describing the problem, proposal,
+   feasibility, and acceptance criteria. See the bundled `fawi-propose` skill.
+2. **Plan** — append an implementation plan (technical approach and an ordered
+   step checklist) to the request and set its `state` to `planned`. See
+   `fawi-plan`.
+3. **Implement** — follow the plan, run the build and tests, set the request to
+   `state: done`, and append a short entry to the [changelog](dev/changelog.md).
+   See `fawi-implement`.
+4. **Check** — before or during implementation, re-validate the request against
+   the current codebase and update its state to `rejected` or `superseded` if it
+   no longer applies. See `fawi-check`.
 
-## Writing a spec
+## Writing a change request
 
-Specs live in `docs/dev/specs/<slug>.md`. They have the front matter shown in
-the [Development](dev/index.md) conventions and these sections:
+Change requests live in `docs/dev/backlog/<slug>.md`. They have the front matter
+shown in the [Development](dev/index.md) conventions and these sections:
 
-- `# Problem` — the motivation.
-- `# Requirements` — MUST/SHOULD requirements.
-- `# Acceptance Criteria` — testable Given/When/Then statements.
-- `# Out of scope` — what is explicitly excluded.
+- `# Problem` — the motivation or gap.
+- `# Proposal` — the change in one or two paragraphs.
+- `# Feasibility` — where the change lands and its risks, found by reading the code.
+- `# Acceptance criteria` — testable, concrete outcomes.
+- `# Implementation plan` — added later by `fawi-plan` (approach and steps).
 
-See the bundled `okf-spec` skill for the full template.
+## Implementing a change
 
-## Adding a plan and an implementation
-
-A plan is a `type: Plan` concept in [plans](dev/plans/) that links back to its
-spec and lays out the technical approach and concrete implementation steps. The
-same pull request may carry the implementation that satisfies the spec's
-acceptance criteria.
-
-Before opening the pull request, verify with:
+Before opening a pull request, verify with:
 
     cargo build -p fawi-server
     cargo build -p fawi-gui --features ssr
     cargo test -p fawi-core -p fawi-storage
 
-When the feature ships, set the plan's `state` to `done` and the spec and plan
-`status` to `stable`. See the bundled `okf-dev` skill for the full workflow.
+When the change ships, set the request's `state` to `done`, then append an
+entry to the [changelog](dev/changelog.md). See the bundled `fawi-implement`
+skill for the full workflow.
 
 Continuous integration runs the build and unit tests on every push to `main`
 and every pull request, and a [release workflow](dev/releases.md) publishes

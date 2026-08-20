@@ -5,25 +5,36 @@ YAML front matter and is machine-readable.
 
 ## Contributing
 
-See [Contributing](../contributing.md) for how to propose a feature.
+See [Contributing](../contributing.md) for how to propose a change.
 
 ## Workflow
 
-1. Find a plan in [plans](plans/) with `state: todo` (or `blocked`).
-2. Read the spec it links to under [specs](specs/).
-3. Implement, then set the plan's `state` to `done` and `status` to `stable`.
-4. When a feature ships, set its spec's `status` to `stable`.
+Development is change-driven. A change starts as a `type: ChangeRequest` in the
+[backlog](backlog/), is planned, implemented, and finally recorded in the
+[changelog](changelog.md):
+
+1. **Propose** — validate the change against the codebase and add it to the
+   backlog with the `fawi-propose` skill.
+2. **Plan** — append an implementation plan and set `state: planned` with the
+   `fawi-plan` skill.
+3. **Implement** — follow the plan, run the build and tests, mark it `state: done`,
+   and append an entry to the changelog with the `fawi-implement` skill.
+4. **Check** — re-validate the request against the code and update its state if
+   it no longer applies with the `fawi-check` skill.
 
 ## Conventions
 
-- `status` (OKF §5.4) is used on **every** concept: `draft`, `stable`, `deprecated`.
-- `state` (producer extension) is used only on `type: Plan`: `todo`, `in-progress`, `blocked`, `done`.
-- `priority` and `owner` are producer extensions used on plans.
+- `status` (OKF §5.4) is used on conventional concepts: `draft`, `stable`,
+  `deprecated`.
+- `type: ChangeRequest` uses a single `state` field instead of `status`. It is a
+  producer extension that captures the whole lifecycle: `proposed`, `planned`,
+  `in-progress`, `done`, `rejected`, `superseded`.
+- `priority` and `owner` are producer extensions used on change requests.
+- `type: ChangeRequest` documents live in [backlog](backlog/); shipped work is
+  recorded in the [changelog](changelog.md).
 
 ## Kinds
 
-- [Roadmap](roadmap.md) — milestones and priorities.
-- [Specifications](specs/) — feature specs.
-- [Plans](plans/) — technical plans and implementation steps.
-- [Decisions](decisions/) — architecture decision records.
+- [Backlog](backlog/) — proposed and planned change requests.
+- [Changelog](changelog.md) — everything that has shipped, newest first.
 - [Releases](releases.md) — how release binaries are built and published.

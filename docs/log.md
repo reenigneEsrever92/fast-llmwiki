@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-08-20
+* **Update**: Replaced the spec-driven development cycle with a change-driven one. Removed `docs/dev/specs/`, `docs/dev/plans/`, and `docs/dev/roadmap.md`; added `docs/dev/backlog/` and `docs/dev/changelog.md`; and replaced the `okf-init` / `okf-spec` / `okf-plan` / `okf-dev` skills with `fawi-propose` / `fawi-plan` / `fawi-implement` / `fawi-check`. Added mermaid diagrams to the architecture doc.
+
 ## 2026-08-19
 * **Creation**: Added an `okf install` subcommand that writes the agent skills embedded in the binary (via an `include_str!` macro) into `.agents/skills`.
 * **Update**: Brought the top-level documentation and README in line with the current code — the single-socket `okf` launcher, the six-crate layout, the `/api/tree` endpoint, and semantic search.

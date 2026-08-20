@@ -66,9 +66,10 @@ cached.
 
     cargo run -p fawi-cli -- install
 
-This writes the agent skills embedded in this repository (for example `okf-dev`,
-`okf-init`, `okf-plan`, and `okf-spec`) into `.agents/skills/` in the current
-directory, one `SKILL.md` per skill. Pass `--dir` to install elsewhere:
+This writes the agent skills embedded in this repository (for example
+`fawi-propose`, `fawi-plan`, `fawi-implement`, and `fawi-check`) into
+`.agents/skills/` in the current directory, one `SKILL.md` per skill. Pass
+`--dir` to install elsewhere:
 
     cargo run -p fawi-cli -- install --dir ~/.agents/skills
 

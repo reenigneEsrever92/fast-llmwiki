@@ -30,10 +30,10 @@ macro_rules! include_skills {
 }
 
 include_skills! {
-    "okf-dev" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-dev/SKILL.md"),
-    "okf-init" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-init/SKILL.md"),
-    "okf-plan" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-plan/SKILL.md"),
-    "okf-spec" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/okf-spec/SKILL.md"),
+    "fawi-propose" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-propose/SKILL.md"),
+    "fawi-plan" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-plan/SKILL.md"),
+    "fawi-implement" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-implement/SKILL.md"),
+    "fawi-check" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-check/SKILL.md"),
 }
 
 #[cfg(test)]
@@ -43,10 +43,10 @@ mod tests {
     #[test]
     fn embeds_every_bundled_skill() {
         let names: Vec<&str> = SKILLS.iter().map(|s| s.name).collect();
-        assert!(names.contains(&"okf-dev"));
-        assert!(names.contains(&"okf-init"));
-        assert!(names.contains(&"okf-plan"));
-        assert!(names.contains(&"okf-spec"));
+        assert!(names.contains(&"fawi-propose"));
+        assert!(names.contains(&"fawi-plan"));
+        assert!(names.contains(&"fawi-implement"));
+        assert!(names.contains(&"fawi-check"));
     }
 
     #[test]

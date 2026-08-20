@@ -23,4 +23,4 @@ built with Rust, axum, and Leptos.
 
 ## Development
 
-- [Development](dev/) — specs, plans, and decisions that drive the roadmap.
+- [Development](dev/) — the change-driven backlog and changelog that guide work.
