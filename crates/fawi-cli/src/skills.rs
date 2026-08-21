@@ -30,6 +30,7 @@ macro_rules! include_skills {
 }
 
 include_skills! {
+    "fawi-init" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-init/SKILL.md"),
     "fawi-propose" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-propose/SKILL.md"),
     "fawi-plan" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-plan/SKILL.md"),
     "fawi-implement" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-implement/SKILL.md"),
@@ -43,6 +44,7 @@ mod tests {
     #[test]
     fn embeds_every_bundled_skill() {
         let names: Vec<&str> = SKILLS.iter().map(|s| s.name).collect();
+        assert!(names.contains(&"fawi-init"));
         assert!(names.contains(&"fawi-propose"));
         assert!(names.contains(&"fawi-plan"));
         assert!(names.contains(&"fawi-implement"));

@@ -22,7 +22,7 @@ console_error_panic_hook = "0.1"
 futures = "0.3"
 
 # server-side (SSR) dependencies
-reqwest = { version = "0.12", default-features = false, features = ["json"] }
+reqwest = { version = "0.13", default-features = false, features = ["json"] }
 leptos_axum = { version = "0.8", optional = true }
 axum = { version = "0.8", optional = true }
 tokio = { version = "1", features = ["full"], optional = true }
@@ -32,7 +32,7 @@ tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
 
 # client-side (hydration) dependencies
-gloo-net = { version = "0.6", features = ["websocket"], optional = true }
+gloo-net = { version = "0.7", features = ["websocket"], optional = true }
 web-sys = { version = "0.3", features = ["Window", "Location"], optional = true }
 wasm-bindgen-futures = { version = "0.4", optional = true }
 send_wrapper = { version = "0.6", features = ["futures"], optional = true }

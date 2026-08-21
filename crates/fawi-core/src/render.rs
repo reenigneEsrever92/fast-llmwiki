@@ -20,9 +20,9 @@ pub fn render_markdown(markdown: &str, base_dir: &str) -> String {
     #[cfg(feature = "mermaid")]
     let mermaid_sources = collect_mermaid_sources(root);
 
-    let mut out = Vec::new();
-    format_html(root, &options, &mut out).expect("writing HTML to a Vec cannot fail");
-    let html = String::from_utf8(out).expect("comrak output is UTF-8");
+    let mut out = String::new();
+    format_html(root, &options, &mut out).expect("writing HTML to a String cannot fail");
+    let html = out;
 
     #[cfg(feature = "mermaid")]
     {
@@ -34,7 +34,7 @@ pub fn render_markdown(markdown: &str, base_dir: &str) -> String {
     }
 }
 
-fn build_options() -> Options {
+fn build_options() -> Options<'static> {
     let mut options = Options::default();
     options.extension.strikethrough = true;
     options.extension.table = true;
@@ -43,7 +43,7 @@ fn build_options() -> Options {
     options.extension.footnotes = true;
     options.extension.superscript = true;
     options.render.hardbreaks = true;
-    options.render.unsafe_ = false;
+    options.render.r#unsafe = false;
     options
 }
 
