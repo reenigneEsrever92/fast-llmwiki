@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Relevance-ranked search results
 description: Rank keyword and semantic search results by relevance rather than title.
 state: proposed

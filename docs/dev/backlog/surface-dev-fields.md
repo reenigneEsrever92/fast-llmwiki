@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Surface arbitrary front matter fields in the web UI
 description: Render non-modeled front matter fields generically on concept pages and directory listings.
 state: done

@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Sort and filter by front matter fields
 description: Order and narrow directory listings by any front matter field.
 state: done

@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Render Mermaid diagrams
 description: Render fenced Mermaid code blocks as diagrams in the web UI instead of showing raw code.
 state: done

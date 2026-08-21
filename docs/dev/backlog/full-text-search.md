@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Full-text search in the bundle index
 description: Search concept bodies, not just titles and slugs.
 state: planned

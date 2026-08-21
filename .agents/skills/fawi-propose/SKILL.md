@@ -1,6 +1,6 @@
 ---
 name: fawi-propose
-description: Turn a feature or change request into a backlog item — inspect the codebase, settle open questions with the user, then write a type - ChangeRequest under docs/dev/backlog.
+description: Turn a new feature or change request into a backlog item — inspect the codebase, settle open questions with the user, then write a type - ChangeRequest with kind - feature under docs/dev/backlog.
 ---
 
 # Proposing a change
@@ -51,6 +51,7 @@ Only when all open points are resolved, create
 
     ---
     type: ChangeRequest
+    kind: feature
     title: <Title>
     description: <one-line summary>
     state: proposed
@@ -61,7 +62,9 @@ Only when all open points are resolved, create
 
 A change request uses a single `state` field (no `status`) to capture its whole
 lifecycle: `proposed` → `planned` → `in-progress` → `done`. `fawi-check` may
-move it to `rejected` or `superseded`.
+move it to `rejected` or `superseded`. The `kind` field marks the change type as
+`feature`, distinguishing it from `bug` (`fawi-fix`) and `refactor`
+(`fawi-refactor`).
 
 ## 5. Fill in the sections
 

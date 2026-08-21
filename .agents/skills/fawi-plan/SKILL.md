@@ -7,7 +7,8 @@ description: Append an implementation plan to a backlog change request — the t
 
 A plan is the "how". Append it to an existing `type: ChangeRequest` in
 `docs/dev/backlog/` — the request stays a single document; the plan is a section
-inside it.
+inside it. This applies to all three change kinds — `feature`, `bug`, and
+`refactor` — regardless of which skill created the request.
 
 ## 1. Find the request
 

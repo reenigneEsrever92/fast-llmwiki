@@ -1,5 +1,6 @@
 ---
 type: ChangeRequest
+kind: feature
 title: Directional sorting with per-field toggle buttons
 description: Replace the sort/filter controls with per-field sort buttons that cycle ascending, descending, and off.
 state: done

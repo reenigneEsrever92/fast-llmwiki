@@ -14,7 +14,8 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
 [changelog](changelog.md):
 
 1. **Propose** — inspect the codebase, settle open questions with the
-   requestor, and add it to the backlog with the `fawi-propose` skill.
+   requestor, and add it to the backlog as a `feature`, `bug`, or `refactor`
+   with the `fawi-propose`, `fawi-fix`, or `fawi-refactor` skill.
 2. **Plan** — append an implementation plan and set `state: planned` with the
    `fawi-plan` skill.
 3. **Implement** — follow the plan, run the build and tests, mark it `state: done`,
@@ -29,6 +30,8 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
 - `type: ChangeRequest` uses a single `state` field instead of `status`. It is a
   producer extension that captures the whole lifecycle: `proposed`, `planned`,
   `in-progress`, `done`, `rejected`, `superseded`.
+- `kind` is a producer extension on change requests that distinguishes the three
+  change types: `feature`, `bug`, and `refactor`.
 - `priority` and `owner` are producer extensions used on change requests.
 - `type: ChangeRequest` documents live in [backlog](backlog/); shipped work is
   recorded in the [changelog](changelog.md).
