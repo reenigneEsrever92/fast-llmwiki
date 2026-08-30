@@ -18,11 +18,13 @@ Read the request's `# Problem`, `# Proposal`, and `# Decisions` sections.
 
 ## 2. Write the approach
 
-Read the relevant crates and tests. Work out:
+Read the relevant crates, tests, and docs under `docs/` (`architecture.md`,
+`features.md`, and the API/CLI references). Work out:
 
 - The crate(s), module(s), and file(s) to touch.
 - The technology choices and data flow.
 - Key decisions and tradeoffs.
+- Which docs under `docs/` the change will update or add.
 
 ## 3. Append the plan
 
@@ -37,6 +39,9 @@ sections:
 
     - [ ] <concrete, ordered step>
     - [ ] ...
+
+Include a step to update any docs under `docs/` the change affects (architecture,
+features, API, CLI, getting-started).
 
 Each step should be verifiable and map to an acceptance criterion.
 

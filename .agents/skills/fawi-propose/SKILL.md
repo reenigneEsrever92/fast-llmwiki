@@ -14,8 +14,9 @@ write the request.
 ## 1. Understand the request
 
 Restate what is being asked, why, and who wants it. Read the codebase to ground
-the request in reality — the crates under `crates/`, the relevant docs, and the
-existing tests. Do not invent files, crates, or commands.
+the request in reality — the crates under `crates/`, the relevant docs under
+`docs/` (start with `architecture.md`, `features.md`, and the API/CLI
+references), and the existing tests. Do not invent files, crates, or commands.
 
 ## 2. Check feasibility
 
@@ -74,6 +75,10 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
   There is no separate feasibility section; feasibility findings fold into the
   decisions.
 - `# Acceptance criteria` — testable, concrete outcomes.
+
+If the change alters documented behaviour — features, architecture, the REST
+API, or the CLI — note which docs under `docs/` it will touch, so the
+implementation plan can include updating them.
 
 ## Next steps
 

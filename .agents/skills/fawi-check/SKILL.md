@@ -23,6 +23,8 @@ For each request:
 - Is the `# Decisions` still accurate?
 - Does the `# Implementation plan` still match the current crate layout, APIs,
   and dependencies? Would the steps still work?
+- Do the docs under `docs/` that the plan touches still match the code, or have
+  they drifted since the request was written?
 
 ## 3. Record the outcome
 

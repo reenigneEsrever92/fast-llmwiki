@@ -15,7 +15,8 @@ write the request.
 
 Restate the defect: what happens, what should happen, and who reported it. Read
 the codebase to ground the report in reality — the crates under `crates/`, the
-relevant docs, and the existing tests. Do not invent files, crates, or commands.
+relevant docs under `docs/` (start with `architecture.md` and `features.md`),
+and the existing tests. Do not invent files, crates, or commands.
 
 ## 2. Reproduce and isolate
 
@@ -80,6 +81,9 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
   decisions.
 - `# Acceptance criteria` — testable, concrete outcomes that show the bug is
   fixed (the reproduction no longer occurs and the expected behaviour holds).
+
+If the bug stems from or exposes a doc that is now wrong, note which docs under
+`docs/` the fix should update.
 
 ## Next steps
 

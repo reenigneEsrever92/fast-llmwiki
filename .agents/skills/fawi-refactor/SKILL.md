@@ -17,7 +17,9 @@ only then write the request.
 
 Restate what is being redesigned, why, and what "better" means. Read the
 codebase to ground the intent in reality — the crates under `crates/`, the
-relevant docs, and the existing tests. Do not invent files, crates, or commands.
+relevant docs under `docs/` (start with `architecture.md`, `features.md`, and
+the API/CLI references), and the existing tests. Do not invent files, crates,
+or commands.
 
 ## 2. Assess the current design
 
@@ -86,6 +88,10 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
   usually assert that intended behaviour is preserved (existing tests still pass)
   and that the structural improvement has landed (e.g. the old path is gone, the
   new module is in place).
+
+If the refactor changes the crate layout, public API, or data flow, note which
+docs under `docs/` (usually `architecture.md` and the API/CLI references) it
+will touch, so the implementation plan can include updating them.
 
 ## Next steps
 

@@ -21,9 +21,9 @@ Development is change-driven. A change to this repository starts as a
 2. **Plan** — append an implementation plan (technical approach and an ordered
    step checklist) to the request and set its `state` to `planned`. See
    `fawi-plan`.
-3. **Implement** — follow the plan, run the build and tests, set the request to
-   `state: done`, and append a short entry to the [changelog](dev/changelog.md).
-   See `fawi-implement`.
+3. **Implement** — follow the plan, run the build and tests, update any docs the
+   change affects, set the request to `state: done`, and append a short entry to
+   the [changelog](dev/changelog.md). See `fawi-implement`.
 4. **Check** — before or during implementation, re-validate the request against
    the current codebase and update its state to `rejected` or `superseded` if it
    no longer applies. See `fawi-check`.
@@ -49,7 +49,8 @@ Before opening a pull request, verify with:
     cargo build -p fawi-gui --features ssr
     cargo test -p fawi-core -p fawi-storage
 
-When the change ships, set the request's `state` to `done`, then append an
+When the change ships, update any docs under `docs/` that it affects (features,
+architecture, API, CLI), set the request's `state` to `done`, then append an
 entry to the [changelog](dev/changelog.md). See the bundled `fawi-implement`
 skill for the full workflow.
 
