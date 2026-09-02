@@ -16,8 +16,8 @@ Development is change-driven. A change to this repository starts as a
 1. **Propose** — inspect the codebase, settle any open questions with the
    requestor, and add a change request to the [backlog](dev/backlog/) describing
    the problem, proposal, key decisions, and acceptance criteria. See the
-   bundled `fawi-propose` (feature), `fawi-fix` (bug), and `fawi-refactor`
-   (redesign/quality) skills.
+   bundled `fawi-propose` (feature), `fawi-fix` (bug), `fawi-refactor`
+   (redesign), and `fawi-improve` (enhancement) skills.
 2. **Plan** — append an implementation plan (technical approach and an ordered
    step checklist) to the request and set its `state` to `planned`. See
    `fawi-plan`.
@@ -32,7 +32,7 @@ Development is change-driven. A change to this repository starts as a
 
 Change requests live in `docs/dev/backlog/<slug>.md`. They have the front matter
 shown in the [Development](dev/index.md) conventions — including a `kind` of
-`feature`, `bug`, or `refactor` — and these sections:
+`feature`, `bug`, `refactor`, or `improvement` — and these sections:
 
 - `# Problem` — the motivation or gap.
 - `# Proposal` — the change in one or two paragraphs.

@@ -35,7 +35,8 @@ Read the code to work out the shape of the change:
   explicitly where behaviour is allowed to change).
 
 If the intent is really a new feature rather than a redesign, say so now and
-redirect to `fawi-propose`.
+redirect to `fawi-propose`; if it is an enhancement of existing behaviour rather
+than a structural redesign, redirect to `fawi-improve`.
 
 ## 3. Discuss open points
 
@@ -72,8 +73,8 @@ Only when all open points are resolved, create
 A change request uses a single `state` field (no `status`) to capture its whole
 lifecycle: `proposed` → `planned` → `in-progress` → `done`. `fawi-check` may
 move it to `rejected` or `superseded`. The `kind` field marks the change type as
-`refactor`, distinguishing it from `feature` (`fawi-propose`) and `bug`
-(`fawi-fix`).
+`refactor`, distinguishing it from `feature` (`fawi-propose`), `improvement`
+(`fawi-improve`), and `bug` (`fawi-fix`).
 
 ## 5. Fill in the sections
 

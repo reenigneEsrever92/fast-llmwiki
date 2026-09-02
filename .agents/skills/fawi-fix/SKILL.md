@@ -31,7 +31,8 @@ Work out whether the report is really a bug and where it lives:
 
 If the report is not actually a bug (it is intended behaviour, a feature request
 in disguise, or a duplicate of an existing request), say so now and stop, or
-redirect to `fawi-propose` when it is a feature.
+redirect to `fawi-propose` when it is a feature, or to `fawi-improve` when it is
+an enhancement of intended behaviour.
 
 ## 3. Discuss open points
 
@@ -67,8 +68,8 @@ Only when all open points are resolved, create
 A change request uses a single `state` field (no `status`) to capture its whole
 lifecycle: `proposed` → `planned` → `in-progress` → `done`. `fawi-check` may
 move it to `rejected` or `superseded`. The `kind` field marks the change type as
-`bug`, distinguishing it from `feature` (`fawi-propose`) and `refactor`
-(`fawi-refactor`).
+`bug`, distinguishing it from `feature` (`fawi-propose`), `improvement`
+(`fawi-improve`), and `refactor` (`fawi-refactor`).
 
 ## 5. Fill in the sections
 

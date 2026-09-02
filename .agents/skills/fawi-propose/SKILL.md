@@ -64,8 +64,8 @@ Only when all open points are resolved, create
 A change request uses a single `state` field (no `status`) to capture its whole
 lifecycle: `proposed` → `planned` → `in-progress` → `done`. `fawi-check` may
 move it to `rejected` or `superseded`. The `kind` field marks the change type as
-`feature`, distinguishing it from `bug` (`fawi-fix`) and `refactor`
-(`fawi-refactor`).
+`feature`, distinguishing it from `bug` (`fawi-fix`), `improvement`
+(`fawi-improve`), and `refactor` (`fawi-refactor`).
 
 ## 5. Fill in the sections
 

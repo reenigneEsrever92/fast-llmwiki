@@ -33,6 +33,7 @@ include_skills! {
     "fawi-init" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-init/SKILL.md"),
     "fawi-propose" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-propose/SKILL.md"),
     "fawi-fix" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-fix/SKILL.md"),
+    "fawi-improve" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-improve/SKILL.md"),
     "fawi-refactor" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-refactor/SKILL.md"),
     "fawi-plan" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-plan/SKILL.md"),
     "fawi-implement" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-implement/SKILL.md"),
@@ -49,6 +50,7 @@ mod tests {
         assert!(names.contains(&"fawi-init"));
         assert!(names.contains(&"fawi-propose"));
         assert!(names.contains(&"fawi-fix"));
+        assert!(names.contains(&"fawi-improve"));
         assert!(names.contains(&"fawi-refactor"));
         assert!(names.contains(&"fawi-plan"));
         assert!(names.contains(&"fawi-implement"));
