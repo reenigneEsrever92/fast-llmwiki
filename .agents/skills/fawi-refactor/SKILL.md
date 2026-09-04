@@ -92,7 +92,8 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
 
 If the refactor changes the crate layout, public API, or data flow, note which
 docs under `docs/` (usually `architecture.md` and the API/CLI references) it
-will touch, so the implementation plan can include updating them.
+will touch and what in each must be rewritten, so the implementation plan can
+include updating them.
 
 ## Next steps
 

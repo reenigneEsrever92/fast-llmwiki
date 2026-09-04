@@ -77,8 +77,9 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
 - `# Acceptance criteria` — testable, concrete outcomes.
 
 If the change alters documented behaviour — features, architecture, the REST
-API, or the CLI — note which docs under `docs/` it will touch, so the
-implementation plan can include updating them.
+API, or the CLI — note which docs under `docs/` it will touch and what in each
+will change, so the implementation plan can turn that into concrete doc-update
+steps.
 
 ## Next steps
 

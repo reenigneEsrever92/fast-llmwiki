@@ -119,25 +119,53 @@ well-scoped change requests is better than a large pile of vague ones.
 
 `index.md` and `log.md` are reserved filenames and carry no front matter.
 
-- `docs/index.md` — the bundle entry point and navigation.
-- `docs/log.md` — the directory update log.
+- `docs/index.md` — the bundle entry point and navigation. Introduce the project
+  in two or three sentences, then link each top-level area — the overview, the
+  requirements, and the development section — with a one-line description of what
+  each holds. It is an index: point to the concepts, do not restate them.
+- `docs/log.md` — the directory update log. It records how the bundle itself
+  evolves. The creation entry from step 9 is its first entry; later updates are
+  prepended under their own `## YYYY-MM-DD` heading. Each entry names the action
+  (`Creation`, `Update`), what changed, and the files involved.
 
 ## 7. Write the concept documents
 
 Every other document is a concept. It must start with YAML front matter whose
 only required field is `type`; the common optional fields are `title`,
-`description`, `tags`, and `status`. Create:
+`description`, `tags`, and `status`. Fill in the full front matter on every new
+concept (as in the template below) and keep it consistent with the schema that
+`frontmatter.md` documents. Create:
 
-- `docs/overview.md` — `type: Overview`; what the project is, in one or two
-  paragraphs, and links to the requirements and use cases.
-- `docs/requirements.md` — `type: Requirements`; the requirement analysis: the
-  potential users, the use cases, the technology choices, and the prioritized
-  requirement list, marking the initial milestone and what is deferred.
-- `docs/frontmatter.md` — `type: Reference`; the front matter schema.
+- `docs/overview.md` — `type: Overview`; what the project is. One or two
+  paragraphs stating the problem it solves, for whom, in what form, and that it
+  is greenfield; then links to the requirements and the development section. Say
+  only what was agreed in step 2 — no aspirations or features that were not
+  discussed.
+- `docs/requirements.md` — `type: Requirements`; the complete requirement
+  analysis from step 3, so nothing decided in the conversation is lost:
+  - the potential users — each persona's name, goal, expertise, and what it
+    cares about, and which are primary;
+  - the use cases — for each primary user, concrete enough that an acceptance
+    criterion could be written from it;
+  - the technology choices — each with the alternative considered and why the
+    chosen one won;
+  - the requirement list — numbered and traced to its user and use case, marked
+    functional or non-functional, with the initial milestone and the deferred
+    requirements called out.
+- `docs/frontmatter.md` — `type: Reference`; the front matter schema the bundle
+  uses. Cover every field that appears anywhere in the bundle — the concept
+  fields above and the change-request extensions (`state`, `kind`, `priority`,
+  `owner`) — stating which are required and what each means.
 - `docs/dev/index.md` — the development section index (no front matter needed;
-  index filenames are reserved).
-- `docs/dev/changelog.md` — `type: Changelog`; shipped changes, newest first.
-- `docs/dev/backlog/index.md` — the backlog index; change requests land here.
+  index filenames are reserved). Introduce the change-driven workflow in a few
+  sentences and link the backlog, the changelog, and the contributing guide.
+- `docs/dev/changelog.md` — `type: Changelog`; shipped changes, newest first,
+  under dated headings. Leave the body empty until `fawi-implement` records the
+  first change.
+- `docs/dev/backlog/index.md` — the backlog index (no front matter needed;
+  index filenames are reserved). State that change requests live here and what
+  `kind` and `state` mean, so readers can navigate the backlog without opening
+  every request.
 
 Use this front matter on concept documents, adjusting `type` and fields:
 
@@ -148,6 +176,20 @@ Use this front matter on concept documents, adjusting `type` and fields:
     tags: [<topic>]
     status: draft
     ---
+
+Hold every concept document to the same quality bar as the change requests:
+
+- One job per document. When two documents need the same fact, one states it
+  and the others link to it.
+- Every statement is grounded in the conversation — no invented users, use
+  cases, technologies, or milestones.
+- Specific over generic: real persona names, real technology names, numbered
+  requirements. No "TBD", "etc.", or placeholder filler.
+- Terminology is consistent across the overview, the requirements, the change
+  requests, and the indexes.
+- Links resolve and point where the reader would look next: the overview
+  reaches the requirements and the backlog, and the indexes reach every
+  document they list.
 
 ## 8. Write the initial change requests
 

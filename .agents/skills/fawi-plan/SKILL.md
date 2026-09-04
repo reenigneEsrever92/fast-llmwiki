@@ -40,8 +40,11 @@ sections:
     - [ ] <concrete, ordered step>
     - [ ] ...
 
-Include a step to update any docs under `docs/` the change affects (architecture,
-features, API, CLI, getting-started).
+Add one step per doc under `docs/` the change affects (architecture, features,
+API, CLI, getting-started), naming the document and exactly what will change in
+it — e.g. "Document the new `sort`/`filter` query parameters in
+`docs/api/rest-api.md`". Place each doc-update step alongside the code step it
+describes, so the docs cannot drift from the implementation.
 
 Each step should be verifiable and map to an acceptance criterion.
 

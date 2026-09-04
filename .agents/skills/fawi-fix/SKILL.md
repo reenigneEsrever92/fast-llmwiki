@@ -84,7 +84,8 @@ move it to `rejected` or `superseded`. The `kind` field marks the change type as
   fixed (the reproduction no longer occurs and the expected behaviour holds).
 
 If the bug stems from or exposes a doc that is now wrong, note which docs under
-`docs/` the fix should update.
+`docs/` the fix should update and what in each is wrong, so the implementation
+plan can include correcting them.
 
 ## Next steps
 
