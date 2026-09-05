@@ -23,6 +23,10 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
    and append an entry to the changelog with the `fawi-implement` skill.
 4. **Check** — re-validate the request against the code and update its state if
    it no longer applies with the `fawi-check` skill.
+5. **Review** — review the current work (everything since the last commit) with
+   the `fawi-review` skill, or audit the whole project with the
+   `fawi-review-all` skill; a review settles its findings with the requestor and
+   records the agreed follow-up as a new change request.
 
 ## Conventions
 

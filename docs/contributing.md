@@ -27,6 +27,11 @@ Development is change-driven. A change to this repository starts as a
 4. **Check** — before or during implementation, re-validate the request against
    the current codebase and update its state to `rejected` or `superseded` if it
    no longer applies. See `fawi-check`.
+5. **Review** — before the work ships, review the current work (everything since
+   the last commit), or periodically audit the whole project. A review settles
+   its findings with you and records the agreed follow-up as a new change
+   request in the backlog. See `fawi-review` (current work) and
+   `fawi-review-all` (whole project).
 
 ## Writing a change request
 
