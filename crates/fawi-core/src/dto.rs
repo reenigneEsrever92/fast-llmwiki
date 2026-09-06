@@ -83,28 +83,6 @@ impl ConceptSummaryResponse {
     }
 }
 
-/// A relevance-ranked semantic search result: a concept summary plus a score.
-///
-/// The summary fields are flattened so the JSON shape matches a plain concept
-/// summary with one extra `score` field (cosine similarity in `[-1, 1]`, higher
-/// is more relevant).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SearchResultResponse {
-    #[serde(flatten)]
-    pub summary: ConceptSummaryResponse,
-    /// Cosine similarity between the query and the concept embedding.
-    pub score: f32,
-}
-
-impl SearchResultResponse {
-    pub fn from_summary(summary: &ConceptSummary, today: NaiveDate, score: f32) -> Self {
-        SearchResultResponse {
-            summary: ConceptSummaryResponse::from_summary(summary, today),
-            score,
-        }
-    }
-}
-
 /// A directory listing, with `index.md`/`log.md` rendered to HTML.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DirListingResponse {

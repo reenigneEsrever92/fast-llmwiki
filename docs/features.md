@@ -10,7 +10,7 @@ status: stable
 
 - **Read-only** bundle browsing, addressed by concept ID (file path without `.md`).
 - **REST API** for concepts, directories, the navigation tree, and search. See [REST API](api/rest-api.md).
-- **Semantic search** over vector embeddings with a local model, reindexed on change. See [REST API](api/rest-api.md).
+- **Hybrid search** fusing keyword and semantic providers through one endpoint, reindexed on change. See [REST API](api/rest-api.md).
 - **Trust, lifecycle, and provenance** rendering from front matter. See [Trust model](trust-model.md).
 - **Hot reload** over WebSocket with a reload toaster. See [Hot reload](api/websocket.md).
 - **Markdown rendering** with bundle link resolution.

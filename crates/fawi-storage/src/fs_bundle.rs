@@ -260,7 +260,6 @@ fn parent_of(id: &str) -> &str {
     }
 }
 
-
 fn compare_field(a: &Concept, b: &Concept, field: Option<&str>) -> Ordering {
     let Some(field) = field else {
         return Ordering::Equal;
@@ -375,28 +374,6 @@ impl BundleSource for FsBundle {
             subdirs,
             fields,
         })
-    }
-
-    async fn search(&self, query: &str) -> Vec<ConceptSummary> {
-        let q = query.to_lowercase();
-        let concepts = self.concepts.read().await;
-
-        let mut out: Vec<ConceptSummary> = concepts
-            .iter()
-            .filter(|(id, c)| {
-                id.to_lowercase().contains(&q)
-                    || c.title.to_lowercase().contains(&q)
-                    || c.concept_type.to_lowercase().contains(&q)
-                    || c.description
-                        .as_deref()
-                        .map(|d| d.to_lowercase().contains(&q))
-                        .unwrap_or(false)
-                    || c.tags.iter().any(|t| t.to_lowercase().contains(&q))
-            })
-            .map(|(_, c)| c.summary())
-            .collect();
-        out.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
-        out
     }
 
     async fn tree(&self) -> TreeNode {
@@ -528,7 +505,10 @@ mod tests {
         let listing = bundle.list_dir("", &opts).await.unwrap();
         let ids: Vec<&str> = listing.concepts.iter().map(|c| c.id.as_str()).collect();
         assert_eq!(ids, vec!["b", "a", "c"]);
-        assert_eq!(listing.fields, vec!["priority".to_string(), "type".to_string()]);
+        assert_eq!(
+            listing.fields,
+            vec!["priority".to_string(), "type".to_string()]
+        );
 
         // Descending reverses the full order.
         let opts = ListOptions {

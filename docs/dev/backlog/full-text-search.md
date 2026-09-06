@@ -3,11 +3,16 @@ type: ChangeRequest
 kind: feature
 title: Full-text search in the bundle index
 description: Search concept bodies, not just titles and slugs.
-state: planned
+state: superseded
 priority: medium
 tags: [dev, search]
 owner: human:felix
 ---
+
+> **Superseded by [Hybrid search with pluggable providers](hybrid-search.md).**
+> Body matching is folded into the new feature's `KeywordProvider`, which
+> extends keyword search with full-body recall as one of the pluggable search
+> strategies.
 
 # Problem
 

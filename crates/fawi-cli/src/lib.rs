@@ -94,7 +94,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<()> {
         }
         Some(Command::Search(args)) => {
             tokio::select! {
-                res = fawi_search::serve(args.data, args.bind) => res,
+                res = serve_search(args.data, args.bind) => res,
                 _ = shutdown_signal() => Ok(()),
             }
         }
@@ -138,7 +138,24 @@ async fn serve_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()>
     // Open the bundle once and share it with the API and semantic-search crates.
     let bundle = fawi_storage::FsBundle::open(&data).await?;
     fawi_server::api::init_bundle(bundle.clone());
-    fawi_search::api::init_bundle(bundle).await?;
+
+    // Keyword search is always available; semantic search is a provider that
+    // may fail to load (e.g. the model is not cached on an air-gapped machine),
+    // so the merged binary degrades to keyword-only rather than refusing to
+    // start.
+    let keyword: std::sync::Arc<dyn fawi_storage::SearchProvider> =
+        std::sync::Arc::new(fawi_storage::KeywordProvider::new(bundle.clone()));
+    let engine: std::sync::Arc<dyn fawi_storage::SearchProvider> =
+        match fawi_search::provider::init(bundle).await {
+            Ok(semantic) => {
+                std::sync::Arc::new(fawi_storage::HybridSearch::new(vec![keyword, semantic]))
+            }
+            Err(e) => {
+                tracing::warn!("semantic search unavailable, using keyword only: {e}");
+                keyword
+            }
+        };
+    fawi_server::api::init_search(engine);
 
     // SSR fetches the API over HTTP on this same socket, so point it at the
     // loopback address for the chosen port.
@@ -147,7 +164,6 @@ async fn serve_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()>
 
     let app = axum::Router::new()
         .merge(fawi_server::api::router())
-        .merge(fawi_search::api::router())
         .merge(fawi_gui::ssr::router());
 
     let listener = tokio::net::TcpListener::bind(&bind)
@@ -155,6 +171,31 @@ async fn serve_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()>
         .map_err(|e| anyhow::anyhow!("failed to bind {bind}: {e}"))?;
     tracing::info!("OKF on http://{bind} (bundle: {})", data.display());
     axum::serve(listener, app)
+        .await
+        .map_err(|e| anyhow::anyhow!("server error: {e}"))?;
+
+    Ok(())
+}
+
+/// Start the search API on its own socket: keyword and semantic providers over
+/// the configured bundle. Unlike the merged binary, a missing embedding model
+/// is a startup error — a semantic search service that cannot load its model
+/// is not useful.
+async fn serve_search(data: std::path::PathBuf, bind: String) -> anyhow::Result<()> {
+    let bundle = fawi_storage::FsBundle::open(&data).await?;
+
+    let keyword: std::sync::Arc<dyn fawi_storage::SearchProvider> =
+        std::sync::Arc::new(fawi_storage::KeywordProvider::new(bundle.clone()));
+    let semantic = fawi_search::provider::init(bundle).await?;
+    let engine: std::sync::Arc<dyn fawi_storage::SearchProvider> =
+        std::sync::Arc::new(fawi_storage::HybridSearch::new(vec![keyword, semantic]));
+    fawi_server::api::init_search(engine);
+
+    let listener = tokio::net::TcpListener::bind(&bind)
+        .await
+        .map_err(|e| anyhow::anyhow!("failed to bind {bind}: {e}"))?;
+    tracing::info!("OKF search API on http://{bind}");
+    axum::serve(listener, fawi_server::api::search_router())
         .await
         .map_err(|e| anyhow::anyhow!("server error: {e}"))?;
 
@@ -250,7 +291,8 @@ mod tests {
 
     #[test]
     fn install_skills_writes_every_skill() {
-        let dir = std::env::temp_dir().join(format!("fawi-cli-install-test-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("fawi-cli-install-test-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
 
         install_skills(&dir).unwrap();

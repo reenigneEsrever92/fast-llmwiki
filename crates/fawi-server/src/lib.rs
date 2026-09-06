@@ -8,7 +8,7 @@ pub mod api;
 
 use std::path::PathBuf;
 
-use fawi_storage::FsBundle;
+use fawi_storage::{FsBundle, KeywordProvider};
 
 /// Open the bundle at `data` and serve the REST API on `bind`.
 ///
@@ -17,7 +17,10 @@ use fawi_storage::FsBundle;
 /// not be bound.
 pub async fn serve(data: PathBuf, bind: String) -> anyhow::Result<()> {
     let bundle = FsBundle::open(&data).await?;
-    api::init_bundle(bundle);
+    api::init_bundle(bundle.clone());
+    // The standalone server serves keyword search only; the merged `okf` binary
+    // injects a hybrid keyword + semantic engine instead.
+    api::init_search(std::sync::Arc::new(KeywordProvider::new(bundle)));
 
     let app = api::router();
 

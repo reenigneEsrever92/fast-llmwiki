@@ -1,6 +1,6 @@
 # OKF Bundle Server
 
-A read-only server, web UI, and semantic search for
+A read-only server, web UI, and hybrid search for
 [Open Knowledge Format (OKF)](docs/okf-format.md) bundles — directories of
 Markdown files with YAML front matter. Built in Rust with axum and Leptos.
 
@@ -16,7 +16,7 @@ The project is a Cargo workspace with six crates under `crates/`:
 - [`fawi-storage`](crates/fawi-storage) — the read-only bundle scanner (`FsBundle`) and filesystem change events.
 - [`fawi-server`](crates/fawi-server) — the REST API and WebSocket hot reload.
 - [`fawi-gui`](crates/fawi-gui) — the Leptos web UI (SSR + hydration).
-- [`fawi-search`](crates/fawi-search) — semantic search over local vector embeddings.
+- [`fawi-search`](crates/fawi-search) — the semantic search provider over local vector embeddings.
 - [`fawi-cli`](crates/fawi-cli) — the unified `okf` launcher that runs the server, GUI, and search together.
 
 ## Running
@@ -25,7 +25,7 @@ The project is a Cargo workspace with six crates under `crates/`:
 cargo run -p fawi-cli
 ```
 
-This serves the REST API, web UI, and semantic search as one merged router on a
+This serves the REST API, web UI, and hybrid search as one merged router on a
 single socket at <http://127.0.0.1:8080>.
 
 To run components individually:
@@ -33,7 +33,7 @@ To run components individually:
 ```sh
 cargo run -p fawi-cli -- server    # REST API only (127.0.0.1:8080)
 cargo run -p fawi-cli -- gui       # web UI only (127.0.0.1:8081)
-cargo run -p fawi-cli -- search    # semantic search only (127.0.0.1:8082)
+cargo run -p fawi-cli -- search    # search API only (127.0.0.1:8082)
 cargo run -p fawi-cli -- install   # install bundled agent skills (./.agents/skills)
 ```
 
@@ -47,12 +47,12 @@ All responses are JSON.
 - `GET /api/concepts/{id}` — a concept, with rendered `content_html`.
 - `GET /api/dirs/{path}` — a directory listing.
 - `GET /api/tree` — the full bundle tree for navigation.
-- `GET /api/search?q=` — keyword search over titles, types, descriptions, and tags.
-- `GET /api/search/semantic?q=` — semantic search over vector embeddings (via the search service).
+- `GET /api/search?q=` — hybrid search: keyword and semantic results fused by reciprocal rank fusion.
 - `GET /api/ws` — WebSocket upgrade for hot reload.
 
-`/api/search/semantic` is provided by `fawi-search` and is available when running
-the merged `okf` or `okf search`. See [REST API](docs/api/rest-api.md).
+Keyword search matches the id, title, type, tags, description, and body,
+weighted by field; the semantic provider adds embedding similarity when the
+model is available. See [REST API](docs/api/rest-api.md).
 
 ## Front matter
 

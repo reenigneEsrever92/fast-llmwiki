@@ -17,14 +17,19 @@ All responses are JSON.
 | GET | `/api/concepts/{id}` | A concept, with rendered `content_html`. |
 | GET | `/api/dirs` / `/api/dirs/{path}` | A directory listing (root or nested). |
 | GET | `/api/tree` | The full bundle tree for navigation. |
-| GET | `/api/search?q=` | Keyword search results. |
-| GET | `/api/search/semantic?q=` | Semantic search results (via `fawi-search`). |
+| GET | `/api/search?q=` | Hybrid search results (keyword + semantic, fused). |
 | GET | `/api/ws` | WebSocket upgrade for hot reload. |
 
-`/api/search` matches titles, types, descriptions, and tags.
-`/api/search/semantic` is provided by the `fawi-search` crate and ranks results
-by cosine similarity using a local embedding model; it is served on the same
-socket when running the merged `okf` binary.
+`/api/search` runs every configured search provider over the bundle and merges
+their ranked lists with reciprocal rank fusion. Keyword search matches the id,
+title, type, tags, description, and body, weighting title and id matches above
+tags/type and description/body; the semantic provider ranks by cosine
+similarity over local vector embeddings and is included when the embedding
+model is available (the merged `okf` binary falls back to keyword-only if it
+cannot load). Results are returned best-first; an empty `q` returns no results.
+
+The payload is a list of concept summaries (same shape as directory listings),
+so clients can treat search results and listings identically.
 
 `/api/dirs` also accepts `sort=<field>` and `dir=asc|desc`. `sort` orders the
 listing by any front matter key (falling back to title); `dir` sets the sort

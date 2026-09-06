@@ -16,19 +16,35 @@ use fawi_core::dto::{
 };
 use fawi_core::render_markdown;
 use fawi_storage::{
-    BundleSource, ChangeEvent, DirListing, FsBundle, ListOptions, SortDirection, TreeNode,
+    BundleSource, ChangeEvent, DirListing, FsBundle, ListOptions, SearchProvider, SortDirection,
+    TreeNode,
 };
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 
 static BUNDLE: OnceLock<Arc<FsBundle>> = OnceLock::new();
+static SEARCH: OnceLock<Arc<dyn SearchProvider>> = OnceLock::new();
 
 pub fn init_bundle(bundle: Arc<FsBundle>) {
     let _ = BUNDLE.set(bundle);
 }
 
+/// Set the search engine backing `GET /api/search`. Called by the composition
+/// root (the `fawi-cli` binary, or `serve()` for a keyword-only default) before
+/// the server starts serving.
+pub fn init_search(engine: Arc<dyn SearchProvider>) {
+    let _ = SEARCH.set(engine);
+}
+
 fn bundle() -> Arc<FsBundle> {
     BUNDLE.get().cloned().expect("bundle not initialized")
+}
+
+fn search_engine() -> Arc<dyn SearchProvider> {
+    SEARCH
+        .get()
+        .cloned()
+        .expect("search engine not initialized")
 }
 
 fn today() -> NaiveDate {
@@ -41,9 +57,15 @@ pub fn router() -> Router {
         .route("/api/concepts", get(not_found))
         .route("/api/dirs/{*path}", get(get_dir))
         .route("/api/dirs", get(get_dir_root))
-        .route("/api/search", get(search))
         .route("/api/tree", get(get_tree))
         .route("/api/ws", get(ws_handler))
+        .merge(search_router())
+}
+
+/// The router exposing only `GET /api/search`, for search-only deployments
+/// (the standalone `okf search` subcommand).
+pub fn search_router() -> Router {
+    Router::new().route("/api/search", get(search))
 }
 
 #[derive(Debug, Deserialize)]
@@ -136,11 +158,15 @@ fn tree_response(node: TreeNode) -> TreeNodeResponse {
 
 async fn search(Query(query): Query<SearchQuery>) -> Response {
     let q = query.q.unwrap_or_default();
-    let results = bundle().search(&q).await;
+    if q.trim().is_empty() {
+        return Json(Vec::<ConceptSummaryResponse>::new()).into_response();
+    }
+
+    let results = search_engine().search(&q).await;
     Json(
         results
             .iter()
-            .map(|s| ConceptSummaryResponse::from_summary(s, today()))
+            .map(|r| ConceptSummaryResponse::from_summary(&r.summary, today()))
             .collect::<Vec<_>>(),
     )
     .into_response()

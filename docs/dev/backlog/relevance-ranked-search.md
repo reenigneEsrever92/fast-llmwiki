@@ -3,11 +3,16 @@ type: ChangeRequest
 kind: feature
 title: Relevance-ranked search results
 description: Rank keyword and semantic search results by relevance rather than title.
-state: proposed
+state: superseded
 priority: low
 tags: [dev, search]
 owner: human:felix
 ---
+
+> **Superseded by [Hybrid search with pluggable providers](hybrid-search.md).**
+> Keyword relevance scoring is folded into the new feature's `KeywordProvider`,
+> and ranking across keyword and semantic strategies is handled by reciprocal
+> rank fusion at the unified `/api/search` endpoint.
 
 # Problem
 

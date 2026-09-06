@@ -1,11 +1,13 @@
 //! Read-only storage and hot reloading for OKF bundles.
 
 mod fs_bundle;
+mod search;
 
 use async_trait::async_trait;
 use fawi_core::{Concept, ConceptSummary};
 
 pub use fs_bundle::{ChangeEvent, FsBundle};
+pub use search::{HybridSearch, KeywordProvider, ScoredSummary, SearchProvider};
 
 /// Direction to apply when sorting a directory listing.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -59,7 +61,6 @@ pub struct TreeNode {
 pub trait BundleSource: Send + Sync {
     async fn concept(&self, id: &str) -> Option<Concept>;
     async fn list_dir(&self, dir: &str, options: &ListOptions) -> Option<DirListing>;
-    async fn search(&self, query: &str) -> Vec<ConceptSummary>;
     /// The full directory tree from the root down, for the navigation sidebar.
     async fn tree(&self) -> TreeNode;
 }

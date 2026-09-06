@@ -12,6 +12,15 @@ Every change is recorded here as it ships. Each entry names what changed, why,
 and links to the change request in the [backlog](backlog/) where one exists.
 See [Development](index.md) for the change-driven workflow.
 
+## 2026-09-06
+
+- **Hybrid search with pluggable keyword and semantic providers** — `/api/search`
+  now returns results fused from keyword and semantic providers by reciprocal
+  rank fusion; `/api/search/semantic` is removed, `fawi-search` became a library
+  exposing a semantic search provider, and keyword search matches bodies with
+  field-weighted relevance. See
+  [Hybrid search with pluggable providers](backlog/hybrid-search.md).
+
 ## 2026-08-20
 
 - **Render Mermaid diagrams server-side** — fenced `mermaid` code blocks are now
