@@ -122,11 +122,12 @@ fn install_skills(dir: &std::path::Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Start the REST API, web UI, and semantic search on a single socket.
+/// Start the REST API, web UI, and search on a single socket.
 ///
-/// The three routers are merged into one axum app so the web UI and its API
-/// share an origin (which is what client-side navigation needs), and the whole
-/// bundle is served by a single binary on a single port.
+/// The server and web UI routers are merged into one axum app so the web UI
+/// and its API share an origin (which is what client-side navigation needs),
+/// and the whole bundle is served by a single binary on a single port. The
+/// search engine is injected separately; see [`serve_all`].
 async fn run_all(data: std::path::PathBuf, bind: String) -> anyhow::Result<()> {
     tokio::select! {
         res = serve_all(data, bind) => res,

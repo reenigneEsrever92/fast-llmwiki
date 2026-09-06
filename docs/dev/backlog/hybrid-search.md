@@ -3,10 +3,11 @@ type: ChangeRequest
 kind: feature
 title: Hybrid search with pluggable keyword and semantic providers
 description: Merge /api/search and /api/search/semantic into one endpoint that fuses ranked results from any injected search provider.
-state: planned
+state: done
 priority: medium
 tags: [dev, search]
 owner: human:felix
+verified: { by: human:felix, at: 2026-09-06T18:00:37Z }
 ---
 
 # Problem
@@ -244,3 +245,5 @@ without a filesystem bundle.
 - [ ] `docs/getting-started.md` and `docs/server/cli.md`: update what `okf`,
       `okf server`, and `okf search` serve and the curl examples
       (`/api/search?q=` on 8080 and 8082).
+
+Implemented in commit `bf327e8de3646ff1cec7dafda0e50f936592f4ac`.
