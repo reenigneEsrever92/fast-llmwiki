@@ -40,6 +40,8 @@ include_skills! {
     "fawi-check" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-check/SKILL.md"),
     "fawi-review" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-review/SKILL.md"),
     "fawi-review-all" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-review-all/SKILL.md"),
+    "fawi-condense" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-condense/SKILL.md"),
+    "fawi-docs" => concat!(env!("CARGO_MANIFEST_DIR"), "/../../.agents/skills/fawi-docs/SKILL.md"),
 }
 
 #[cfg(test)]
@@ -59,6 +61,8 @@ mod tests {
         assert!(names.contains(&"fawi-check"));
         assert!(names.contains(&"fawi-review"));
         assert!(names.contains(&"fawi-review-all"));
+        assert!(names.contains(&"fawi-condense"));
+        assert!(names.contains(&"fawi-docs"));
     }
 
     #[test]

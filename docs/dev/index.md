@@ -27,6 +27,10 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
    the `fawi-review` skill, or audit the whole project with the
    `fawi-review-all` skill; a review settles its findings with the requestor and
    records the agreed follow-up as a new change request.
+6. **Document** — bring the docs under `docs/` back in line with the code and
+   the backlog with the `fawi-docs` skill.
+7. **Condense** — when the backlog grows unwieldy, retire finished change
+   requests into a single condensed summary with the `fawi-condense` skill.
 
 ## Conventions
 
@@ -38,11 +42,13 @@ Development is change-driven. A change starts as a `type: ChangeRequest` in the
 - `kind` is a producer extension on change requests that distinguishes the four
   change types: `feature`, `bug`, `refactor`, and `improvement`.
 - `priority` and `owner` are producer extensions used on change requests.
-- `type: ChangeRequest` documents live in [backlog](backlog/); shipped work is
-  recorded in the [changelog](changelog.md).
+- `type: ChangeRequest` documents live in [backlog](backlog/); finished ones
+  are condensed into [Condensed backlog](backlog/summary.md), and shipped work
+  is recorded in the [changelog](changelog.md).
 
 ## Kinds
 
-- [Backlog](backlog/) — proposed and planned change requests.
+- [Backlog](backlog/) — open change requests (proposed and planned).
+- [Condensed backlog](backlog/summary.md) — retired change requests in summary form.
 - [Changelog](changelog.md) — everything that has shipped, newest first.
 - [Releases](releases.md) — how release binaries are built and published.

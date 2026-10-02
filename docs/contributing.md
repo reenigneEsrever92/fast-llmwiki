@@ -32,6 +32,11 @@ Development is change-driven. A change to this repository starts as a
    its findings with you and records the agreed follow-up as a new change
    request in the backlog. See `fawi-review` (current work) and
    `fawi-review-all` (whole project).
+6. **Document** — bring the docs under `docs/` back in line with the code and
+   the backlog. See `fawi-docs`.
+7. **Condense** — when the backlog grows unwieldy, retire finished change
+   requests into a single condensed summary that keeps their problem, proposal,
+   decisions, and acceptance criteria. See `fawi-condense`.
 
 ## Writing a change request
 
